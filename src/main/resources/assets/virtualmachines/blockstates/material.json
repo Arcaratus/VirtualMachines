@@ -1,0 +1,29 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "builtin/generated",
+		"textures": {
+			"layer0": "blocks/dirt"
+		},
+		"transform": "forge:default-item"
+	},
+	"variants": {
+		"type": {
+			"virtual_machine_core_empty": {
+				"textures": {
+					"layer0": "virtualmachines:items/material/virtual_machine_core_empty"
+				}
+			},
+			"virtual_machine_core_filled": {
+				"textures": {
+					"layer0": "virtualmachines:items/material/virtual_machine_core_filled"
+				}
+			},
+			"virtual_machine_core_flux": {
+				"textures": {
+					"layer0": "virtualmachines:items/material/virtual_machine_core_flux"
+				}
+			}
+		}
+	}
+}

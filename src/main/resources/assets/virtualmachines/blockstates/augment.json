@@ -1,0 +1,19 @@
+{
+	"forge_marker": 1,
+	"defaults": {
+		"model": "builtin/generated",
+		"textures": {
+			"layer0": "thermalexpansion:items/augment/placeholder"
+		},
+		"transform": "forge:default-item"
+	},
+	"variants": {
+		"type": {
+			"machinefarmsoil": {
+				"textures": {
+					"layer0": "virtualmachines:items/augment/machine_farm_soil"
+				}
+			}
+		}
+	}
+}

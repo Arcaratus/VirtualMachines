@@ -1,0 +1,155 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'maven'
+
+def build_number = 'CUSTOM'
+if (System.getenv('BUILD_NUMBER') != null)
+    build_number = System.getenv('BUILD_NUMBER')
+
+def username = "${mod_name}"
+if (project.hasProperty('dev_username'))
+    username = "${dev_username}"
+
+version = "${mc_version}-${mod_version}-${build_number}"
+group = package_group
+archivesBaseName = mod_name
+
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+repositories {
+    maven { url "http://dvs1.progwml6.com/files/maven" }
+    maven {	url "http://tehnut.info/maven" }
+	maven { url "http://chickenbones.net/maven" }
+	maven {
+        name = "CoFH Maven"
+        url = "http://maven.covers1624.net"
+    }
+}
+
+dependencies {
+
+    // you may put jars on which you depend on in ./libs
+    // or you may define them like so..
+    //compile "some.group:artifact:version:classifier"
+    //compile "some.group:artifact:version"
+      
+    // real examples
+    //compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
+    //compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+
+    // the 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
+    //provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // the deobf configurations:  'deobfCompile' and 'deobfProvided' are the same as the normal compile and provided,
+    // except that these dependencies get remapped to your current MCP mappings
+    //deobfCompile 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+    //deobfProvided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // for more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+	
+    deobfCompile "mezz.jei:jei_${mc_version}:${jei_version}"
+    deobfCompile "mcp.mobius.waila:Hwyla:${waila_version}_1.12"
+	deobfCompile "cofh:RedstoneFlux:1.12-2.+:deobf"
+	deobfCompile "cofh:CoFHCore:${mc_version}-+:deobf"
+	deobfCompile "cofh:ThermalFoundation:${mc_version}-+:deobf"
+	deobfCompile "cofh:ThermalExpansion:${mc_version}-+:deobf"
+	deobfCompile "cofh:ThermalDynamics:${mc_version}-${td_version}:deobf"
+	deobfCompile "codechicken:CodeChickenLib:${mc_version}-${ccl_version}:deobf"
+}
+
+minecraft {
+    version = "${mc_version}-${forge_version}"
+    runDir = "run"
+	
+	replace "@VERSION@", project.version
+    replaceIn "VirtualMachines.java"
+    
+	clientRunArgs += "--username=${username}"
+	
+    if (project.hasProperty('mappings_version'))
+        mappings = project.mappings_version
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/*.info'
+        include '**/*.properties'
+
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude '**/*.info'
+        exclude '**/*.properties'
+    }
+}
+
+//jar {
+//    classifier = ''
+//    manifest.mainAttributes(
+//        "Built-By": System.getProperty('user.name'),
+//        "Created-By": "${System.getProperty('java.vm.version')} + (${System.getProperty('java.vm.vendor')})",
+//        "Implementation-Title": project.name,
+//        "Implementation-Version": project.version,
+//        "Git-Hash": gitHash,
+//        "Built-On": "${mc_version}-${forge_version}"
+//    )
+//}
+
+tasks.withType(JavaCompile) { task ->
+    task.options.encoding = 'UTF-8'
+}
+
+//publishing {
+//    tasks.publish.dependsOn 'build'
+//    publications {
+//        mavenJava(MavenPublication) {
+//            artifact jar
+//            artifact sourceJar
+//        }
+//    }
+//    repositories {
+//        if (project.hasProperty('maven_repo')) {
+//            maven { url maven_repo }
+//        } else {
+//            mavenLocal()
+//        }
+//    }
+//}
+
+def curseRelations = {
+    optionalLibrary 'just-enough-items-jei'
+    optionalLibrary 'waila'
+}
+
+//curseforge {
+//	if (project.hasProperty('curse_key_Arcaratus'))
+//        apiKey = project.curse_key_Arcaratus
+//
+//    project {
+//        id = "${curse_id}"
+//        releaseType = 'beta'
+//
+//        relations curseRelations
+//		addGameVersion '1.12'
+//		
+//        addArtifact sourceJar
+//    }
+//}

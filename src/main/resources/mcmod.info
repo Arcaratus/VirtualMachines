@@ -1,0 +1,16 @@
+[
+{
+  "modid": "virtualmachines",
+  "name": "Virtual Machines",
+  "description": "Virtual machines.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Arcaratus"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

@@ -1,0 +1,22 @@
+itemGroup.virtualmachines.creativeTab=Virtual Machines
+
+tile.virtualmachines.farm.name=Virtual Farm
+tile.virtualmachines.fishery.name=Virtual Fishery
+
+item.virtualmachines.material.virtual_machine_core_empty.name=Virtual Machine Core (Empty)
+item.virtualmachines.material.virtual_machine_core_filled.name=Virtual Machine Core (Filled)
+item.virtualmachines.material.virtual_machine_core_flux.name=Virtual Machine Core
+
+item.virtualmachines.augment.machineFarmSoil.name=Soil Virtualization
+
+gui.virtualmachines.farm.modeLocked=Seed Slots Locked
+gui.virtualmachines.farm.modeUnlocked=Seed Slots Unlocked
+
+info.virtualmachines.farm=Virtually farms plants.
+info.virtualmachines.fishery=Virtually fishes.
+
+info.virtualmachines.augment.machineFarmSoil.0=Virtual Farm: Specialization
+info.virtualmachines.augment.machineFarmSoil.a.0=Farms plants regardless of soil requirements.
+
+tab.virtualmachines.machine.farm=Virtual Farm
+tab.virtualmachines.machine.fishery=Virtual Fishery
