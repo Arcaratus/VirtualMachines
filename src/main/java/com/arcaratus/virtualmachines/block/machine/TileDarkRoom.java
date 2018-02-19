@@ -235,7 +235,7 @@ public class TileDarkRoom extends TileVirtualMachine
         setInventorySlotContents(SLOT_SWORD, damagedSwordStack);
 
         if (augmentExperience && damage > 0)
-            tank.modifyFluidStored((int) Math.round(world.rand.nextGaussian() * 25F + EXPERIENCE));
+            tank.fill(new FluidStack(TFFluids.fluidExperience, (int) Math.round(world.rand.nextGaussian() * 25F + EXPERIENCE)), true);
 
         updateOutputs = true;
     }
@@ -338,11 +338,6 @@ public class TileDarkRoom extends TileVirtualMachine
         return augmentExperience && flagExperience;
     }
 
-    public boolean fluidArrow()
-    {
-        return augmentExperience;
-    }
-
     @Override
     public void readFromNBT(NBTTagCompound nbt)
     {
@@ -388,6 +383,7 @@ public class TileDarkRoom extends TileVirtualMachine
         PacketBase payload = super.getGuiPacket();
 
         payload.addBool(augmentExperience);
+        payload.addBool(augmentNether);
         payload.addFluidStack(tank.getFluid());
 
         return payload;
@@ -400,6 +396,7 @@ public class TileDarkRoom extends TileVirtualMachine
 
         augmentExperience = payload.getBool();
         flagExperience = augmentExperience;
+        augmentNether = payload.getBool();
         tank.setFluid(payload.getFluidStack());
     }
 
@@ -440,7 +437,7 @@ public class TileDarkRoom extends TileVirtualMachine
     {
         String id = AugmentHelper.getAugmentIdentifier(augments[slot]);
 
-        if (VMConstants.MACHINE_EXPERIENCE.equals(id))
+        if (!augmentExperience && VMConstants.MACHINE_EXPERIENCE.equals(id))
         {
             augmentExperience = true;
             hasModeAugment = true;
@@ -448,7 +445,7 @@ public class TileDarkRoom extends TileVirtualMachine
             return true;
         }
 
-        if (VMConstants.MACHINE_NETHER.equals(id))
+        if (!augmentNether && VMConstants.MACHINE_NETHER.equals(id))
         {
             augmentNether = true;
             energyMod += NETHER_MOD;

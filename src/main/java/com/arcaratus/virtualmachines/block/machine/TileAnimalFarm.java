@@ -23,7 +23,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.init.*;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -136,7 +136,7 @@ public class TileAnimalFarm extends TileVirtualMachine
     @Override
     protected boolean canStart()
     {
-        if (getStackInSlot(SLOT_ANIMAL_MORB).isEmpty() || getStackInSlot(SLOT_ANIMAL_MORB).getItem() != TEItems.itemMorb)//|| !Utils.checkItemStackRange(inventory, SLOT_TOOLS_START, SLOT_TOOLS_START + 4, s -> Utils.checkTool(s, "sword")))
+        if (getStackInSlot(SLOT_ANIMAL_MORB).isEmpty() || getStackInSlot(SLOT_ANIMAL_MORB).getItem() != TEItems.itemMorb)
             return false;
 
         List<ItemStack> tools = Utils.arrayToListWithRange(inventory, SLOT_TOOLS_START, SLOT_TOOLS_START + 4);
@@ -318,7 +318,7 @@ public class TileAnimalFarm extends TileVirtualMachine
         }
 
         if (augmentExperience && damage > 0)
-            tank.modifyFluidStored((int) Math.round(world.rand.nextGaussian() * 25F + EXPERIENCE));
+            tank.fill(new FluidStack(TFFluids.fluidExperience, (int) Math.round(world.rand.nextGaussian() * 25F + EXPERIENCE)), true);
 
         updateOutputs = true;
     }
@@ -434,11 +434,6 @@ public class TileAnimalFarm extends TileVirtualMachine
         return augmentExperience && flagExperience;
     }
 
-    public boolean fluidArrow()
-    {
-        return augmentExperience;
-    }
-
     @Override
     public void readFromNBT(NBTTagCompound nbt)
     {
@@ -486,6 +481,8 @@ public class TileAnimalFarm extends TileVirtualMachine
         PacketBase payload = super.getGuiPacket();
 
         payload.addBool(augmentExperience);
+        payload.addBool(augmentRancher);
+        payload.addBool(augmentPermamorb);
         payload.addFluidStack(tank.getFluid());
 
         return payload;
@@ -497,6 +494,8 @@ public class TileAnimalFarm extends TileVirtualMachine
         super.handleGuiPacket(payload);
 
         augmentExperience = payload.getBool();
+        augmentRancher = payload.getBool();
+        augmentPermamorb = payload.getBool();
         flagExperience = augmentExperience;
         tank.setFluid(payload.getFluidStack());
     }
@@ -507,6 +506,8 @@ public class TileAnimalFarm extends TileVirtualMachine
         super.preAugmentInstall();
 
         augmentExperience = false;
+        augmentRancher = false;
+        augmentPermamorb = false;
     }
 
     @Override
@@ -539,7 +540,7 @@ public class TileAnimalFarm extends TileVirtualMachine
     {
         String id = AugmentHelper.getAugmentIdentifier(augments[slot]);
 
-        if (VMConstants.MACHINE_EXPERIENCE.equals(id))
+        if (!augmentExperience && VMConstants.MACHINE_EXPERIENCE.equals(id))
         {
             augmentExperience = true;
             hasModeAugment = true;
@@ -547,7 +548,7 @@ public class TileAnimalFarm extends TileVirtualMachine
             return true;
         }
 
-        if (VMConstants.MACHINE_RANCHER.equals(id))
+        if (!augmentRancher && VMConstants.MACHINE_RANCHER.equals(id))
         {
             augmentRancher = true;
             hasModeAugment = true;
@@ -555,7 +556,7 @@ public class TileAnimalFarm extends TileVirtualMachine
             return true;
         }
 
-        if (VMConstants.MACHINE_PERMAMORB.equals(id))
+        if (!augmentPermamorb && VMConstants.MACHINE_PERMAMORB.equals(id))
         {
             augmentPermamorb = true;
             energyMod += PERMAMORB_MOD;
@@ -563,6 +564,21 @@ public class TileAnimalFarm extends TileVirtualMachine
         }
 
         return super.installAugmentToSlot(slot);
+    }
+
+    @Override
+    public boolean isItemValidForSlot(int slot, ItemStack stack)
+    {
+        if (slot == SLOT_ANIMAL_MORB)
+        {
+            return stack.getItem() == TEItems.itemMorb;
+        }
+        else if (Utils.isSlotInRange(slot, SLOT_TOOLS_START, SLOT_TOOLS_START + 4))
+        {
+            return Utils.checkTool(stack, "sword") || stack.getItem() instanceof ItemShears || stack.getItem() == Items.BOWL || stack.getItem() == Items.BUCKET;
+        }
+
+        return false;
     }
 
     @Override

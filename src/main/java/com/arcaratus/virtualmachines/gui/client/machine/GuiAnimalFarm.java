@@ -71,8 +71,8 @@ public class GuiAnimalFarm extends GuiPoweredBase
 
         tankBackground.setVisible(myTile.augmentExperience());
         tank.setVisible(myTile.augmentExperience());
-        progressFluid.setVisible(myTile.fluidArrow());
-        progressOverlay.setVisible(myTile.fluidArrow());
+        progressFluid.setVisible(myTile.augmentExperience());
+        progressOverlay.setVisible(myTile.augmentExperience());
     }
 
     @Override
@@ -107,11 +107,11 @@ public class GuiAnimalFarm extends GuiPoweredBase
         progressFluid.setSize(baseTile.getScaledProgress(PROGRESS), 16);
         progressOverlay.setQuantity(baseTile.getScaledProgress(PROGRESS));
 
-        progress.setVisible(!myTile.fluidArrow());
+        progress.setVisible(!myTile.augmentExperience());
 
         tankBackground.setVisible(myTile.augmentExperience());
         tank.setVisible(myTile.augmentExperience());
-        progressFluid.setVisible(myTile.fluidArrow());
-        progressOverlay.setVisible(myTile.fluidArrow());
+        progressFluid.setVisible(myTile.augmentExperience());
+        progressOverlay.setVisible(myTile.augmentExperience());
     }
 }
