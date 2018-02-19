@@ -1,0 +1,12 @@
+------------------------------------------------------
+Version 1.0.1
+------------------------------------------------------
+
+- Yay a changelog!
+- Added in the Virtual Dark Room
+- Added in the Virtual Animal Farm
+- Added in the Experience Augment
+- Added in the Nether Simulator Augment
+- Added in the Rancher Augment
+- Added in the Perma-Morb Augment
+- Fixed so many bugs LUL
