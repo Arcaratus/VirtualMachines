@@ -11,7 +11,7 @@ import com.arcaratus.virtualmachines.gui.client.machine.GuiFishery;
 import com.arcaratus.virtualmachines.gui.container.machine.ContainerFishery;
 import com.arcaratus.virtualmachines.utils.Utils;
 import com.arcaratus.virtualmachines.virtual.VirtualFishery;
-import com.arcaratus.virtualmachines.virtual.VirtualMachine;
+import com.arcaratus.virtualmachines.virtual.IVirtualMachine;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
@@ -42,9 +42,9 @@ public class TileFishery extends TileVirtualMachine
     public static void init()
     {
         SIDE_CONFIGS[TYPE] = new SideConfig();
-        SIDE_CONFIGS[TYPE].numConfig = 4;
-        SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, { SLOT_FISHING_ROD, SLOT_BAIT }, IntStream.range(SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9).toArray(), {} };
-        SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, INPUT_ALL, OUTPUT_ALL, OPEN };
+        SIDE_CONFIGS[TYPE].numConfig = 5;
+        SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, { SLOT_FISHING_ROD, SLOT_BAIT }, IntStream.range(SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9).toArray(), { SLOT_FISHING_ROD }, { SLOT_BAIT }, {}, IntStream.range(0, 12).toArray() };
+        SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, INPUT_ALL, OUTPUT_ALL, INPUT_PRIMARY, INPUT_SECONDARY, OPEN, OMNI };
         SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 3, 1, 2, 2, 2, 2 };
 
         SLOT_CONFIGS[TYPE] = new SlotConfig();
@@ -117,6 +117,7 @@ public class TileFishery extends TileVirtualMachine
         List<ItemStack> outputs = virtualFishery.getOutputs();
         if (updateOutputs)
         {
+            outputs.clear();
             ItemStack rodStack = getStackInSlot(SLOT_FISHING_ROD);
             LootContext.Builder lootContext = new LootContext.Builder((WorldServer) world);
             lootContext.withLuck((float) EnchantmentHelper.getFishingLuckBonus(rodStack));
@@ -125,7 +126,7 @@ public class TileFishery extends TileVirtualMachine
             updateOutputs = false;
         }
 
-        return Utils.canFitOutputs(this, outputs, SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9);
+        return !outputs.isEmpty() && Utils.canFitOutputs(this, outputs, SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9);
     }
 
     @Override
@@ -364,7 +365,7 @@ public class TileFishery extends TileVirtualMachine
     }
 
     @Override
-    public VirtualMachine getVirtualMachine()
+    public IVirtualMachine getVirtualMachine()
     {
         return virtualFishery;
     }

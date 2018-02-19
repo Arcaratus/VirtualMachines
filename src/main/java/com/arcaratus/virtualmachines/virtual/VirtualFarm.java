@@ -1,10 +1,8 @@
 package com.arcaratus.virtualmachines.virtual;
 
-import cofh.core.inventory.ComparableItemStack;
 import cofh.thermalfoundation.item.ItemFertilizer;
 import com.arcaratus.virtualmachines.init.VMConstants;
-import com.arcaratus.virtualmachines.utils.Distribution;
-import com.arcaratus.virtualmachines.utils.Utils;
+import com.arcaratus.virtualmachines.utils.*;
 import com.google.common.collect.*;
 import gnu.trove.map.hash.THashMap;
 import net.minecraft.init.Blocks;
@@ -18,11 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.*;
 import java.util.function.Predicate;
 
-/**
- * Code adapted from Immersive Engineering
- * https://github.com/BluSunrize/ImmersiveEngineering
- */
-public class VirtualFarm extends VirtualMachine
+public class VirtualFarm implements IVirtualMachine
 {
     private static HashSet<IPlantHandler> plantHandlers = new HashSet<>();
     private static HashSet<IItemFertilizerHandler> itemFertilizers = new HashSet<>();
@@ -139,7 +133,7 @@ public class VirtualFarm extends VirtualMachine
             defaultWater = 800;
             defaultEnergy = 6000;
 
-            final double[] saplingDrops = new double[] { 0.0629, 0.1794, 0.2483, 0.2265, 0.1517, 0.08, 0.0345, 0.0127, 0.004 };
+            final double[] saplingDrops = new double[] { 0.0629, 0.1798, 0.2483, 0.2265, 0.1517, 0.08, 0.0345, 0.0127 };
             saplingHandler.registerSapling(new ItemStack(Blocks.SAPLING), ezPredicates(s -> Utils.checkTool(s, "axe"), s -> Utils.checkTool(s, "shears")), ezLists(ezPairs(new double[][] { ezDArray(4, 0.3333, 0.3333, 0.3334), saplingDrops }, new ItemStack(Blocks.LOG), new ItemStack(Blocks.SAPLING)), ezPairs(new double[][] { ezDArray(47, 0.0002, 0.003, 0.0162, 0.0539, 0.1208, 0.1936, 0.2254, 0.1933, 0.1207, 0.0537, 0.0161, 0.0029, 0.0002) }, new ItemStack(Blocks.LEAVES))), defaultWater, defaultEnergy);
             saplingHandler.registerSapling(new ItemStack(Blocks.SAPLING, 1, 1), ezPredicates(s -> Utils.checkTool(s, "axe"), s -> Utils.checkTool(s, "shears")), ezLists(ezPairs(new double[][] { ezDArray(4, 0.0833, 0.167, 0.25, 0.25, 0.1665, 0.0832), new double[] { 0, 0.25, 0.25, 0.125, 0.125, 0.2189, 0.0311 } }, new ItemStack(Blocks.LOG, 1, 1), new ItemStack(Blocks.SAPLING, 1, 1)), ezPairs(new double[][] { Utils.joinArrays(ezDArray(33, 0.09375), ezDArray(3, 0.09375, 0.20833), ezDArray(19, 0.20834, 0.20833), ezDArray(3, 0.09375, 0.09375)) }, new ItemStack(Blocks.LEAVES, 1, 1))), defaultWater, defaultEnergy);
             saplingHandler.registerSapling(new ItemStack(Blocks.SAPLING, 1, 2), ezPredicates(s -> Utils.checkTool(s, "axe"), s -> Utils.checkTool(s, "shears")), ezLists(ezPairs(new double[][] { ezDArray(5, 0.3334, 0.3333, 0.3333), saplingDrops }, new ItemStack(Blocks.LOG, 1, 2), new ItemStack(Blocks.SAPLING, 1, 2)), ezPairs(new double[][] { ezDArray(52, 0.0002, 0.003, 0.0162, 0.0537, 0.121, 0.1933, 0.2254, 0.1933, 0.1207, 0.0538, 0.0162, 0.003, 0.0002) }, new ItemStack(Blocks.LEAVES, 1, 2))), defaultWater, defaultEnergy);
@@ -232,13 +226,13 @@ public class VirtualFarm extends VirtualMachine
         @Override
         public boolean isValid(ItemStack seed)
         {
-            return !seed.isEmpty() && (getSeedMap().keySet().contains(new ComparableItemStack(seed)) || getSeedMap().keySet().stream().anyMatch(s -> s.equals(new ComparableItemStack(seed))));
+            return !seed.isEmpty() && (getSeedMap().keySet().contains(new ComparableItemStack(seed, false)) || getSeedMap().keySet().stream().anyMatch(s -> s.equals(new ComparableItemStack(seed))));
         }
 
         @Override
         public boolean requiresDirt(ItemStack seed)
         {
-            return seedSoilMap.get(new ComparableItemStack(seed));
+            return seedSoilMap.get(new ComparableItemStack(seed, false));
         }
 
         @Override
@@ -248,22 +242,22 @@ public class VirtualFarm extends VirtualMachine
                 if (Utils.checkTool(t, "hoe", "sickle"))
                     usableTools.add(t);
 
-            if (seedOutputMap.get(new ComparableItemStack(seed)) == null)
+            if (seedOutputMap.get(new ComparableItemStack(seed, false)) == null)
                 return seedOutputMap.values().stream().filter(l -> l.stream().anyMatch(p -> p.getRight().isItemEqual(seed))).findFirst().get();
 
-            return seedOutputMap.getOrDefault(new ComparableItemStack(seed), Lists.newArrayList());
+            return seedOutputMap.getOrDefault(new ComparableItemStack(seed, false), Lists.newArrayList());
         }
 
         @Override
         public int waterRequired(ItemStack seed)
         {
-            return getSeedMap().getOrDefault(new ComparableItemStack(seed), getSeedMap().entrySet().stream().filter(e -> e.getKey().equals(new ComparableItemStack(seed))).findFirst().get().getValue()).getLeft();
+            return getSeedMap().getOrDefault(new ComparableItemStack(seed, false), getSeedMap().entrySet().stream().filter(e -> e.getKey().equals(new ComparableItemStack(seed))).findFirst().get().getValue()).getLeft();
         }
 
         @Override
         public int energyRequired(ItemStack seed)
         {
-            return getSeedMap().getOrDefault(new ComparableItemStack(seed), getSeedMap().entrySet().stream().filter(e -> e.getKey().equals(new ComparableItemStack(seed))).findFirst().get().getValue()).getRight();
+            return getSeedMap().getOrDefault(new ComparableItemStack(seed, false), getSeedMap().entrySet().stream().filter(e -> e.getKey().equals(new ComparableItemStack(seed))).findFirst().get().getValue()).getRight();
         }
 
         @Override
@@ -285,7 +279,7 @@ public class VirtualFarm extends VirtualMachine
 
         public void register(ItemStack seed, List<Pair<Distribution, ItemStack>> output, int waterRequired, int energyRequired, boolean requiresDirt)
         {
-            ComparableItemStack comp = new ComparableItemStack(seed);
+            ComparableItemStack comp = new ComparableItemStack(seed, false);
             getSeedMap().put(comp, Pair.of(waterRequired, energyRequired));
             seedSoilMap.put(comp, requiresDirt);
             seedOutputMap.put(comp, output);
@@ -293,7 +287,7 @@ public class VirtualFarm extends VirtualMachine
 
         public void registerSapling(ItemStack sapling, List<Predicate<ItemStack>> tools, List<List<Pair<Distribution, ItemStack>>> outputs, int waterRequired, int energyRequired)
         {
-            ComparableItemStack comp = new ComparableItemStack(sapling);
+            ComparableItemStack comp = new ComparableItemStack(sapling, false);
             getSeedMap().put(comp, Pair.of(waterRequired, energyRequired));
             seedSoilMap.put(comp, true);
             for (int i = 0; i < tools.size(); i++)
@@ -335,7 +329,8 @@ public class VirtualFarm extends VirtualMachine
                 return super.getOutput(seed, tools);
 
             List<Predicate<ItemStack>> p = new ArrayList<>();
-            ComparableItemStack comp = new ComparableItemStack(seed);
+            ComparableItemStack comp = new ComparableItemStack(seed, false);
+
             first:
             for (Predicate<ItemStack> pp : saplingOutputTable.row(comp).keySet())
             {
@@ -343,9 +338,13 @@ public class VirtualFarm extends VirtualMachine
                 {
                     if (pp.test(t))
                     {
-                        p.add(pp);
-                        usableTools.add(t);
-                        continue first;
+                        if (saplingOutputTable.contains(comp, pp))
+                        {
+                            p.add(pp);
+                            if (!usableTools.contains(t))
+                                usableTools.add(t);
+                            continue first;
+                        }
                     }
                 }
             }
@@ -386,11 +385,19 @@ public class VirtualFarm extends VirtualMachine
 
     private List<IPlantHandler> currentPlantHandlers;
     private List<ItemStack> currentSeeds = new ArrayList<>();
+    private List<List<ItemStack>> currentTools = new ArrayList<>();
 
     public VirtualFarm()
     {
+        List<ItemStack> emptyList = new ArrayList<>();
+        for (int j = 0; j < 4; j++)
+            emptyList.add(ItemStack.EMPTY);
+
         for (int i = 0; i < 9; i++)
+        {
             currentSeeds.add(i, ItemStack.EMPTY);
+            currentTools.add(i, emptyList);
+        }
     }
 
     public List<ItemStack> getCurrentSeeds()
@@ -401,6 +408,16 @@ public class VirtualFarm extends VirtualMachine
     public void setCurrentSeeds(List<ItemStack> currentSeeds)
     {
         this.currentSeeds = currentSeeds;
+    }
+
+    public List<List<ItemStack>> getCurrentTools()
+    {
+        return currentTools;
+    }
+
+    public void setCurrentTools(List<List<ItemStack>> currentTools)
+    {
+        this.currentTools = currentTools;
     }
 
     public List<IPlantHandler> getCurrentPlantHandlers()
@@ -428,18 +445,25 @@ public class VirtualFarm extends VirtualMachine
 
     public void clear()
     {
+        currentTools.clear();
+        List<ItemStack> emptyList = new ArrayList<>();
+        for (int j = 0; j < 4; j++)
+            emptyList.add(ItemStack.EMPTY);
+
         for (int i = 0; i < 9; i++)
         {
             currentSeeds.set(i, ItemStack.EMPTY);
             currentPlantHandlers.set(i, null);
+
+            currentTools.add(i, emptyList);
         }
     }
 
     @Override
-    public VirtualMachine readFromNBT(NBTTagCompound tag)
+    public IVirtualMachine readFromNBT(NBTTagCompound tag)
     {
-        super.readFromNBT(tag);
         NBTTagList seedList = tag.getTagList(VMConstants.NBT_CURRENT_SEEDS, 10);
+        NBTTagList omegaLUL = tag.getTagList(VMConstants.NBT_CURRENT_TOOLS, 9);
         for (int i = 0; i < 9; i++)
         {
             if (currentPlantHandlers == null)
@@ -456,6 +480,10 @@ public class VirtualFarm extends VirtualMachine
             }
 
             currentSeeds.set(i, new ItemStack(seedList.getCompoundTagAt(i)));
+
+            NBTTagList toolsList = (NBTTagList) omegaLUL.get(i);
+            for (int j = 0; j < 4; j++)
+                currentTools.get(i).set(j, new ItemStack(toolsList.getCompoundTagAt(j)));
         }
 
         return this;
@@ -464,10 +492,9 @@ public class VirtualFarm extends VirtualMachine
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound tag)
     {
-        super.writeToNBT(tag);
-
         NBTTagList list = new NBTTagList();
         NBTTagList seedList = new NBTTagList();
+        NBTTagList omegaLul = new NBTTagList();
 
         for (int i = 0; i < 9; i++)
         {
@@ -479,10 +506,21 @@ public class VirtualFarm extends VirtualMachine
             NBTTagCompound nbt = new NBTTagCompound();
             currentSeeds.get(i).writeToNBT(nbt);
             seedList.appendTag(nbt);
+
+            NBTTagList toolsList = new NBTTagList();
+            for (int j = 0; j < 4; j++)
+            {
+                nbt = new NBTTagCompound();
+                currentTools.get(i).get(j).writeToNBT(nbt);
+                toolsList.appendTag(nbt);
+            }
+
+            omegaLul.appendTag(toolsList);
         }
 
         tag.setTag(VMConstants.NBT_PLANT_HANDLERS, list);
         tag.setTag(VMConstants.NBT_CURRENT_SEEDS, seedList);
+        tag.setTag(VMConstants.NBT_CURRENT_TOOLS, omegaLul);
 
         return tag;
     }

@@ -8,13 +8,11 @@ import net.minecraft.nbt.NBTTagList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VirtualFishery implements IVirtualMachine
+public class VirtualDarkRoom implements IVirtualMachine
 {
-    public static void init() {}
-
     private List<ItemStack> outputs = new ArrayList<>();
 
-    public VirtualFishery() {}
+    public VirtualDarkRoom() {}
 
     public List<ItemStack> getOutputs()
     {

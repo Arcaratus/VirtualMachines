@@ -44,7 +44,7 @@ public class ItemMaterial extends ItemMulti implements IInitializer
     {
         addShapedRecipe(virtual_machine_core_empty, "ESE", "SIS", "ESE", 'E', "plateElectrum", 'S', "plateSignalum", 'I', "gearInvar");
 
-        TransposerManager.addFillRecipe(16000, virtual_machine_core_empty, virtual_machine_core_filled, new FluidStack(TFFluids.fluidEnder, 4000), false);
+        TransposerManager.addFillRecipe(16000, virtual_machine_core_empty, virtual_machine_core_filled, new FluidStack(TFFluids.fluidEnder, 8000), false);
 
         ChargerManager.addRecipe(160000, virtual_machine_core_filled, virtual_machine_core_flux);
 

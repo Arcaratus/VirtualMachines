@@ -21,6 +21,12 @@ public class VMConstants
     public static final String NBT_PLANT_HANDLERS = "plantHandlers";
     public static final String NBT_OUTPUTS = "outputs";
     public static final String NBT_CURRENT_SEEDS = "currentSeeds";
+    public static final String NBT_CURRENT_TOOLS = "currentTools";
+    public static final String NBT_TOOLS = "tools";
 
     public static final String MACHINE_FARM_SOIL = "machineFarmSoil";
+    public static final String MACHINE_EXPERIENCE = "machineExperience";
+    public static final String MACHINE_NETHER = "machineNether";
+    public static final String MACHINE_RANCHER = "machineRancher";
+    public static final String MACHINE_PERMAMORB = "machinePermamorb";
 }

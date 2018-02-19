@@ -7,6 +7,7 @@ import com.arcaratus.virtualmachines.block.machine.TileFarm;
 import com.arcaratus.virtualmachines.utils.Utils;
 import com.arcaratus.virtualmachines.virtual.VirtualFarm;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
@@ -23,7 +24,7 @@ public class ContainerFarm extends ContainerTEBase
         /* Farm inventory */
         for (int i = 0; i < 2; i++)
             for (int j = 0; j < 9; j++)
-                addSlotToContainer(new SlotRemoveOnly(myTile, j + i * 9, 8 + j * 18, 77 + i * 18));
+                addSlotToContainer(new Slot(myTile, j + i * 9, 8 + j * 18, 77 + i * 18));
 
         /* Tools */
         for (int i = 0; i < 2; i++)

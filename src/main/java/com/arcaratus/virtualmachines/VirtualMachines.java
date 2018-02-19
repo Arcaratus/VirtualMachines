@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
-@Mod(modid = VirtualMachines.MOD_ID, version = VirtualMachines.VERSION, name = "Virtual Machines", dependencies = "required-after:redstoneflux;after:cofhcore;after:thermalfoundation;after:thermalexpansion", guiFactory = "com.arcaratus.virtualmachines.gui.GuiConfigVMFactory")
+@Mod(modid = VirtualMachines.MOD_ID, version = VirtualMachines.VERSION, name = VirtualMachines.NAME, dependencies = "required-after:redstoneflux;after:cofhcore;after:thermalfoundation;after:thermalexpansion", guiFactory = "com.arcaratus.virtualmachines.gui.GuiConfigVMFactory")
 public class VirtualMachines
 {
     public static final String MOD_ID = "virtualmachines";
@@ -30,7 +30,7 @@ public class VirtualMachines
     public static CommonProxy proxy;
 
     public static final ConfigHandler CONFIG = new ConfigHandler(VERSION);
-    public static final Logger LOGGER = LogManager.getLogger("Virtual Machines");
+    public static final Logger LOGGER = LogManager.getLogger(VirtualMachines.NAME);
 
     public static CreativeTabs TAB_VIRTUAL_MACHINES = new CreativeTabCore(MOD_ID)
     {

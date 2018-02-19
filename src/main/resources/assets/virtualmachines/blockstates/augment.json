@@ -13,6 +13,26 @@
 				"textures": {
 					"layer0": "virtualmachines:items/augment/machine_farm_soil"
 				}
+			},
+			"machineexperience": {
+				"textures": {
+					"layer0": "virtualmachines:items/augment/machine_experience"
+				}
+			},
+			"machinenether": {
+				"textures": {
+					"layer0": "virtualmachines:items/augment/machine_nether"
+				}
+			},
+			"machinerancher": {
+				"textures": {
+					"layer0": "virtualmachines:items/augment/machine_rancher"
+				}
+			},
+			"machinepermamorb": {
+				"textures": {
+					"layer0": "virtualmachines:items/augment/machine_permamorb"
+				}
 			}
 		}
 	}

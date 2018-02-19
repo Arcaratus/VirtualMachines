@@ -30,6 +30,8 @@ public class GuiFishery extends GuiPoweredBase
     {
         super(new ContainerFishery(inventory, tile), tile, inventory.player, TEXTURE);
 
+        generateInfo(VMConstants.MACHINE_GUI_INFO + "fishery");
+
         myTile = (TileFishery) tile;
     }
 

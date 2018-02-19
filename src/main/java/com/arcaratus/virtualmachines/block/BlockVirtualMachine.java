@@ -16,8 +16,7 @@ import cofh.thermalexpansion.init.TETextures;
 import cofh.thermalexpansion.item.ItemAugment;
 import cofh.thermalexpansion.util.helpers.ReconfigurableHelper;
 import cofh.thermalfoundation.init.TFProps;
-import cofh.thermalfoundation.item.ItemFertilizer;
-import cofh.thermalfoundation.item.ItemUpgrade;
+import cofh.thermalfoundation.item.*;
 import com.arcaratus.virtualmachines.VirtualMachines;
 import com.arcaratus.virtualmachines.block.machine.*;
 import com.arcaratus.virtualmachines.init.VMConstants;
@@ -35,6 +34,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -57,6 +57,13 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
 {
     public static final PropertyEnum<Type> VARIANT = PropertyEnum.create("type", Type.class);
     public static boolean[] enable = new boolean[Type.values().length];
+
+    public static ItemStack virtual_farm;
+    public static ItemStack virtual_fishery;
+    public static ItemStack virtual_dark_room;
+    public static ItemStack virtual_animal_farm;
+
+    public static ItemBlockVirtualMachine itemBlock;
 
     public BlockVirtualMachine()
     {
@@ -101,6 +108,7 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
                 {
                     items.add(itemBlock.setDefaultTag(new ItemStack(this, 1, i), TEProps.creativeTabLevel));
                 }
+
                 if (TEProps.creativeTabShowCreative)
                 {
                     items.add(itemBlock.setCreativeTag(new ItemStack(this, 1, i)));
@@ -139,6 +147,10 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
                 return new TileFarm();
             case FISHERY:
                 return new TileFishery();
+            case DARK_ROOM:
+                return new TileDarkRoom();
+            case ANIMAL_FARM:
+                return new TileAnimalFarm();
             default:
                 return null;
         }
@@ -325,6 +337,8 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         VirtualFarm.init();
         TileFishery.init();
         VirtualFishery.init();
+        TileDarkRoom.init();
+        TileAnimalFarm.init();
 
         VirtualMachines.proxy.addIModelRegister(this);
 
@@ -336,6 +350,8 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
     {
         virtual_farm = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.FARM.getMetadata()));
         virtual_fishery = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.FISHERY.getMetadata()));
+        virtual_dark_room = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.DARK_ROOM.getMetadata()));
+        virtual_animal_farm = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.ANIMAL_FARM.getMetadata()));
 
         addRecipes();
         addUpgradeRecipes();
@@ -369,9 +385,39 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
                     "EVE",
                     'P', "plateInvar",
                     'A', "blockGlassHardened",
-                    'F', ItemFertilizer.fertilizerFlux,
+                    'F', ItemBait.baitFlux,
                     'I', BlockDevice.deviceFisher,
                     'E', "gearSignalum",
+                    'V', com.arcaratus.virtualmachines.item.ItemMaterial.virtual_machine_core_flux
+            );
+        }
+
+        if (enable[Type.DARK_ROOM.getMetadata()])
+        {
+            addShapedRecipe(virtual_dark_room,
+                    "PAP",
+                    "FIF",
+                    "EVE",
+                    'P', "plateConstantan",
+                    'A', ItemAugment.machineCentrifugeMobs,
+                    'F', "blockGlassBlack",
+                    'I', BlockMachine.machinePulverizer,
+                    'E', "gearInvar",
+                    'V', com.arcaratus.virtualmachines.item.ItemMaterial.virtual_machine_core_flux
+            );
+        }
+
+        if (enable[Type.ANIMAL_FARM.getMetadata()])
+        {
+            addShapedRecipe(virtual_animal_farm,
+                    "PAP",
+                    "FIF",
+                    "EVE",
+                    'P', "plateSilver",
+                    'A', ItemAugment.machineCentrifugeMobs,
+                    'F', Blocks.HAY_BLOCK,
+                    'I', BlockMachine.machinePulverizer,
+                    'E', "gearTin",
                     'V', com.arcaratus.virtualmachines.item.ItemMaterial.virtual_machine_core_flux
             );
         }
@@ -447,7 +493,11 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
 
     public enum Type implements IStringSerializable
     {
-        FARM(0, "farm"), FISHERY(1, "fishery");
+        FARM(0, "farm"),
+        FISHERY(1, "fishery"),
+        DARK_ROOM(2, "dark_room"),
+        ANIMAL_FARM(3, "animal_farm"),
+        ;
 
         private static final Type[] METADATA_LOOKUP = new Type[values().length];
         private final int metadata;
@@ -476,6 +526,7 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
             {
                 metadata = 0;
             }
+
             return METADATA_LOOKUP[metadata];
         }
 
@@ -487,9 +538,4 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
             }
         }
     }
-
-    public static ItemStack virtual_farm;
-    public static ItemStack virtual_fishery;
-
-    public static ItemBlockVirtualMachine itemBlock;
 }

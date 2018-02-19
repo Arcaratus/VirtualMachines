@@ -12,14 +12,14 @@ import com.arcaratus.virtualmachines.block.BlockVirtualMachine.Type;
 import com.arcaratus.virtualmachines.gui.client.machine.GuiFarm;
 import com.arcaratus.virtualmachines.gui.container.machine.ContainerFarm;
 import com.arcaratus.virtualmachines.init.VMConstants;
-import com.arcaratus.virtualmachines.utils.Distribution;
-import com.arcaratus.virtualmachines.utils.Utils;
+import com.arcaratus.virtualmachines.utils.*;
+import com.arcaratus.virtualmachines.virtual.IVirtualMachine;
 import com.arcaratus.virtualmachines.virtual.VirtualFarm;
 import com.arcaratus.virtualmachines.virtual.VirtualFarm.IItemFertilizerHandler;
 import com.arcaratus.virtualmachines.virtual.VirtualFarm.IPlantHandler;
-import com.arcaratus.virtualmachines.virtual.VirtualMachine;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -50,9 +50,9 @@ public class TileFarm extends TileVirtualMachine
     public static void init()
     {
         SIDE_CONFIGS[TYPE] = new SideConfig();
-        SIDE_CONFIGS[TYPE].numConfig = 6;
-        SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, IntStream.range(SLOT_TOOLS_START, 33).toArray(), IntStream.range(0, SLOT_TOOLS_START).toArray(), {}, IntStream.range(SLOT_FARM_START, 33).toArray(), IntStream.range(SLOT_TOOLS_START, SLOT_FARM_START).toArray() };
-        SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, INPUT_ALL, OUTPUT_ALL, OPEN, INPUT_PRIMARY, INPUT_SECONDARY };
+        SIDE_CONFIGS[TYPE].numConfig = 7;
+        SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, IntStream.range(SLOT_TOOLS_START, 33).toArray(), IntStream.range(0, SLOT_TOOLS_START).toArray(), {}, IntStream.range(SLOT_FARM_START, 33).toArray(), IntStream.range(SLOT_TOOLS_START, SLOT_FARM_START).toArray(), IntStream.range(0, 33).toArray() };
+        SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, INPUT_ALL, OUTPUT_ALL, OPEN, INPUT_PRIMARY, INPUT_SECONDARY, OMNI };
         SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 3, 1, 2, 2, 2, 2 };
 
         SLOT_CONFIGS[TYPE] = new SlotConfig();
@@ -93,7 +93,6 @@ public class TileFarm extends TileVirtualMachine
     private FluidTankCore tank = new FluidTankCore(TEProps.MAX_FLUID_LARGE);
 
     protected boolean augmentSoil;
-    protected boolean augmentFertilizer;
     protected boolean augmentMonoculture;
 
     private VirtualFarm virtualFarm = new VirtualFarm();
@@ -146,8 +145,12 @@ public class TileFarm extends TileVirtualMachine
             return false;
 
         List<ItemStack> lol = new ArrayList<>();
+        List<List<ItemStack>> omegaLUL = new ArrayList<>();
         for (int i = 0; i < 9; i++)
         {
+            omegaLUL.add(i, new ArrayList<>());
+            for (int j = 0; j < 4; j++)
+                omegaLUL.get(i).add(j, ItemStack.EMPTY);
             lol.add(i, ItemStack.EMPTY);
             IPlantHandler plantHandler = currentPlantHandlers.get(i);
             ItemStack seed = farm.get(i);
@@ -166,6 +169,17 @@ public class TileFarm extends TileVirtualMachine
                     ItemStack seedCopy = seed.copy();
                     lol.set(i, seedCopy);
 
+                    List<ItemStack> OMEGALUL = new ArrayList<>();
+                    for (int j = 0; j < 4; j++)
+                    {
+                        if (j < plantHandler.getTools().size())
+                            OMEGALUL.add(j, plantHandler.getTools().get(j).copy());
+                        else
+                            OMEGALUL.add(j, ItemStack.EMPTY);
+                    }
+
+                    omegaLUL.add(i, OMEGALUL);
+
                     if (!augmentMonoculture)
                         seed.shrink(1);
                 }
@@ -173,6 +187,7 @@ public class TileFarm extends TileVirtualMachine
         }
 
         virtualFarm.setCurrentSeeds(lol);
+        virtualFarm.setCurrentTools(omegaLUL);
         return true;
     }
 
@@ -212,10 +227,14 @@ public class TileFarm extends TileVirtualMachine
                 maxProcess /= fertilizerHandler.getGrowthMultiplier(fertilizerStack);
 
                 if (reuseChance > 0)
+                {
                     if (world.rand.nextInt(SECONDARY_BASE) >= reuseChance)
                         fertilizerStack.shrink(1);
+                }
                 else
+                {
                     fertilizerStack.shrink(1);
+                }
             }
         }
 
@@ -244,23 +263,30 @@ public class TileFarm extends TileVirtualMachine
                     {
                         ItemStack output = new ItemStack(p.getRight().getItem(), p.getLeft().getOutput(), p.getRight().getMetadata());
 
-                        if (output.isItemEqual(seed) && augmentMonoculture)
+                        if (augmentMonoculture && output.isItemEqual(seed))
                             output.shrink(2);
 
-                        if (!output.isEmpty() && output.getCount() > 0)
+                        if (!output.isEmpty())
                         {
-                            List<ItemStack> tools = plantHandler.getTools(); // Size should never be past 4
+                            List<ItemStack> tools = virtualFarm.getCurrentTools().get(i);
 
                             for (int itx = SLOT_TOOLS_START; itx < SLOT_TOOLS_START + 4; itx++)
                             {
-                                final int it = itx;
-                                ItemStack tool = tools.stream().findFirst().filter(s -> s.isItemEqualIgnoreDurability(getStackInSlot(it))).orElse(ItemStack.EMPTY);
-                                if (getStackInSlot(itx).isItemEqualIgnoreDurability(tool))
+                                if (!tools.get(itx - SLOT_TOOLS_START).isEmpty() && tools.get(itx - SLOT_TOOLS_START).isItemEqualIgnoreDurability(getStackInSlot(itx)))
                                 {
-                                    ItemStack s = getStackInSlot(itx);
-                                    s = Utils.damageItem(s, Utils.checkTool(s, "hoe", "sickle") ? 1 : output.getCount(), world.rand);
+                                    boolean isLeaves = new ComparableItemStack(output).equals(new ComparableItemStack(new ItemStack(Blocks.LEAVES)));
+                                    ItemStack tool = getStackInSlot(itx);
+                                    if (isLeaves && !Utils.checkTool(tool, "shears"))
+                                        continue;
 
-                                    setInventorySlotContents(itx, s);
+                                    if (getStackInSlot(itx).getItem() == tool.getItem())
+                                    {
+                                        ItemStack s = tool.copy();
+                                        s = Utils.damageItem(s, Utils.checkTool(s, "hoe", "sickle") ? 1 : output.getCount(), world.rand);
+
+                                        setInventorySlotContents(itx, s);
+                                        tools.remove(tool);
+                                    }
                                 }
                             }
 
@@ -474,7 +500,8 @@ public class TileFarm extends TileVirtualMachine
         try
         {
             payload.writeNBT(nbt);
-        } catch (Exception e) {}
+        }
+        catch (Exception e) {}
 
         return payload;
     }
@@ -492,7 +519,8 @@ public class TileFarm extends TileVirtualMachine
             NBTTagList list = nbt.getTagList("ItemLocks", 10);
             for (int i = 0; i < 9; i++)
                 itemLocks.set(i, new ItemStack(list.getCompoundTagAt(i)));
-        } catch (Exception e) {}
+        }
+        catch (Exception e) {}
 
         callNeighborTileChange();
     }
@@ -519,7 +547,8 @@ public class TileFarm extends TileVirtualMachine
         try
         {
             payload.writeNBT(nbt);
-        } catch (Exception e) {}
+        }
+        catch (Exception e) {}
 
         return payload;
     }
@@ -538,7 +567,8 @@ public class TileFarm extends TileVirtualMachine
             NBTTagList list = nbt.getTagList("ItemLocks", 10);
             for (int i = 0; i < 9; i++)
                 itemLocks.set(i, new ItemStack(list.getCompoundTagAt(i)));
-        } catch (Exception e) {}
+        }
+        catch (Exception e) {}
     }
 
     @Override
@@ -681,7 +711,7 @@ public class TileFarm extends TileVirtualMachine
     }
 
     @Override
-    public VirtualMachine getVirtualMachine()
+    public IVirtualMachine getVirtualMachine()
     {
         return virtualFarm;
     }

@@ -17,7 +17,7 @@ import cofh.thermalexpansion.init.TETextures;
 import cofh.thermalfoundation.init.TFProps;
 import com.arcaratus.virtualmachines.block.BlockVirtualMachine.Type;
 import com.arcaratus.virtualmachines.init.VMTextures;
-import com.arcaratus.virtualmachines.virtual.VirtualMachine;
+import com.arcaratus.virtualmachines.virtual.IVirtualMachine;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -553,7 +553,7 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
         return TETextures.MACHINE_SIDE;
     }
 
-    public abstract VirtualMachine getVirtualMachine();
+    public abstract IVirtualMachine getVirtualMachine();
 
     /* RENDERING */
     public boolean hasFluidUnderlay()
