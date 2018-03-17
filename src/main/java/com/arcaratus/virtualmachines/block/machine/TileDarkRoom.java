@@ -197,6 +197,10 @@ public class TileDarkRoom extends TileVirtualMachine
                 virtualDarkRoom.setOutputs(outputs);
                 updateOutputs = false;
             }
+            else
+            {
+                return false;
+            }
         }
 
         return Utils.canFitOutputs(this, outputs, SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9);

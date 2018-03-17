@@ -29,4 +29,5 @@ public class VMConstants
     public static final String MACHINE_NETHER = "machineNether";
     public static final String MACHINE_RANCHER = "machineRancher";
     public static final String MACHINE_PERMAMORB = "machinePermamorb";
+    public static final String MACHINE_MORB_CAPTURE = "machineMorbCapture";
 }

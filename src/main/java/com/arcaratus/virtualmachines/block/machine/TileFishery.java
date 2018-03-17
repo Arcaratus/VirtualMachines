@@ -138,7 +138,7 @@ public class TileFishery extends TileVirtualMachine
     @Override
     protected void processStart()
     {
-        double maxProcess = 12000;
+        double maxProcess = 18000;
 
         ItemStack baitStack = getStackInSlot(SLOT_BAIT);
         if (!baitStack.isEmpty())

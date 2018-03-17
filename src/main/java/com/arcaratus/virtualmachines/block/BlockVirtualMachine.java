@@ -35,6 +35,7 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -62,6 +63,8 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
     public static ItemStack virtual_fishery;
     public static ItemStack virtual_dark_room;
     public static ItemStack virtual_animal_farm;
+    public static ItemStack virtual_mob_spawner;
+    public static ItemStack virtual_mob_farm;
 
     public static ItemBlockVirtualMachine itemBlock;
 
@@ -151,6 +154,10 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
                 return new TileDarkRoom();
             case ANIMAL_FARM:
                 return new TileAnimalFarm();
+            case MOB_SPAWNER:
+                return new TileMobSpawner();
+            case MOB_FARM:
+                return new TileMobFarm();
             default:
                 return null;
         }
@@ -339,6 +346,8 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         VirtualFishery.init();
         TileDarkRoom.init();
         TileAnimalFarm.init();
+        TileMobSpawner.init();
+        TileMobFarm.init();
 
         VirtualMachines.proxy.addIModelRegister(this);
 
@@ -352,6 +361,8 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         virtual_fishery = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.FISHERY.getMetadata()));
         virtual_dark_room = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.DARK_ROOM.getMetadata()));
         virtual_animal_farm = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.ANIMAL_FARM.getMetadata()));
+        virtual_mob_spawner = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.MOB_SPAWNER.getMetadata()));
+        virtual_mob_farm = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.MOB_FARM.getMetadata()));
 
         addRecipes();
         addUpgradeRecipes();
@@ -419,6 +430,34 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
                     'I', BlockMachine.machinePulverizer,
                     'E', "gearTin",
                     'V', com.arcaratus.virtualmachines.item.ItemMaterial.virtual_machine_core_flux
+            );
+        }
+
+        if (enable[Type.MOB_SPAWNER.getMetadata()])
+        {
+            addShapedRecipe(virtual_mob_spawner,
+                    "PAP",
+                    "FIF",
+                    "EVE",
+                    'P', "plateElectrum",
+                    'A', BlockVirtualMachine.virtual_dark_room,
+                    'F', Blocks.BEACON,
+                    'I', BlockVirtualMachine.virtual_animal_farm,
+                    'E', "gearLumium",
+                    'V', com.arcaratus.virtualmachines.item.ItemMaterial.virtual_machine_core_flux
+            );
+        }
+
+        if (enable[Type.MOB_FARM.getMetadata()])
+        {
+            addShapedRecipe(virtual_mob_farm,
+                    "SBS",
+                    "SFS",
+                    "STS",
+                    'S', virtual_mob_spawner,
+                    'B', Blocks.BEACON,
+                    'F', Items.DRAGON_BREATH,
+                    'T', Items.TOTEM_OF_UNDYING
             );
         }
     }
@@ -497,6 +536,8 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         FISHERY(1, "fishery"),
         DARK_ROOM(2, "dark_room"),
         ANIMAL_FARM(3, "animal_farm"),
+        MOB_SPAWNER(4, "mob_spawner"),
+        MOB_FARM(5, "mob_farm"),
         ;
 
         private static final Type[] METADATA_LOOKUP = new Type[values().length];

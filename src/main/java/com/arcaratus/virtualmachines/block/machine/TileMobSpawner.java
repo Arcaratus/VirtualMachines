@@ -13,17 +13,16 @@ import cofh.thermalfoundation.init.TFFluids;
 import com.arcaratus.virtualmachines.VirtualMachines;
 import com.arcaratus.virtualmachines.block.BlockVirtualMachine;
 import com.arcaratus.virtualmachines.block.BlockVirtualMachine.Type;
-import com.arcaratus.virtualmachines.gui.client.machine.GuiAnimalFarm;
-import com.arcaratus.virtualmachines.gui.container.machine.ContainerAnimalFarm;
+import com.arcaratus.virtualmachines.gui.client.machine.GuiMobSpawner;
+import com.arcaratus.virtualmachines.gui.container.machine.ContainerMobSpawner;
 import com.arcaratus.virtualmachines.init.VMConstants;
 import com.arcaratus.virtualmachines.utils.Utils;
 import com.arcaratus.virtualmachines.virtual.IVirtualMachine;
-import com.arcaratus.virtualmachines.virtual.VirtualAnimalFarm;
-import com.google.common.collect.Lists;
+import com.arcaratus.virtualmachines.virtual.VirtualMobSpawner;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.*;
-import net.minecraft.item.*;
+import net.minecraft.init.Enchantments;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
@@ -36,80 +35,76 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.IntStream;
 
-public class TileAnimalFarm extends TileVirtualMachine
+public class TileMobSpawner extends TileVirtualMachine
 {
-    private static final int TYPE = Type.ANIMAL_FARM.getMetadata();
+    private static final int TYPE = Type.MOB_SPAWNER.getMetadata();
     public static int basePower = 80;
 
-    public static int SLOT_TOOLS_START = 0;
-    public static int SLOT_ANIMAL_MORB = 4;
-    public static int SLOT_OUTPUT_START = 5;
+    public static int SLOT_SWORD = 0;
+    public static int SLOT_MORB = 1;
+    public static int SLOT_OUTPUT_START = 2;
 
-    public static final int EXPERIENCE_MOD = 40;
-    public static final int RANCHER_MOD = 40;
+    public static final int EXPERIENCE_MOD = 80;
     public static final int PERMAMORB_MOD = 220;
+    public static final int MORB_CAPTURE_MOD = 60;
 
     public static final int EXPERIENCE = 50;
 
     public static void init()
     {
         SIDE_CONFIGS[TYPE] = new SideConfig();
-        SIDE_CONFIGS[TYPE].numConfig = 7;
-        SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, IntStream.range(SLOT_TOOLS_START, SLOT_ANIMAL_MORB + 1).toArray(), IntStream.range(SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9).toArray(), { SLOT_ANIMAL_MORB }, IntStream.range(SLOT_TOOLS_START, SLOT_TOOLS_START + 4).toArray(), {}, IntStream.range(0, 15).toArray() };
+        SIDE_CONFIGS[TYPE].numConfig = 5;
+        SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, { SLOT_SWORD, SLOT_MORB }, IntStream.range(SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9).toArray(), { SLOT_SWORD }, { SLOT_MORB }, {}, IntStream.range(SLOT_SWORD, SLOT_OUTPUT_START + 9).toArray() };
         SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, INPUT_ALL, OUTPUT_ALL, INPUT_PRIMARY, INPUT_SECONDARY, OPEN, OMNI };
-        SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 5, 1, 2, 2, 2, 2 };
+        SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 3, 1, 2, 2, 2, 2 };
 
         SLOT_CONFIGS[TYPE] = new SlotConfig();
-        SLOT_CONFIGS[TYPE].allowInsertionSlot = new boolean[] { true, true, true, true, true, false, false, false, false, false, false, false, false, false };
-        SLOT_CONFIGS[TYPE].allowExtractionSlot = new boolean[] { false, false, false, false, false, true, true, true, true, true, true, true, true, true };
+        SLOT_CONFIGS[TYPE].allowInsertionSlot = new boolean[] { true, true, false, false, false, false, false, false, false, false, false };
+        SLOT_CONFIGS[TYPE].allowExtractionSlot = new boolean[] { false, true, true, true, true, true, true, true, true, true, true };
 
         VALID_AUGMENTS[TYPE] = new HashSet<>();
         VALID_AUGMENTS[TYPE].add(VMConstants.MACHINE_EXPERIENCE);
-        VALID_AUGMENTS[TYPE].add(VMConstants.MACHINE_RANCHER);
         VALID_AUGMENTS[TYPE].add(VMConstants.MACHINE_PERMAMORB);
+        VALID_AUGMENTS[TYPE].add(VMConstants.MACHINE_MORB_CAPTURE);
 
         LIGHT_VALUES[TYPE] = 14;
 
-        GameRegistry.registerTileEntity(TileAnimalFarm.class, "virtualmachines:virtual_animal_farm");
+        GameRegistry.registerTileEntity(TileMobSpawner.class, "virtualmachines:virtual_mob_spawner");
 
         config();
     }
 
     public static void config()
     {
-        String category = "VirtualMachine.AnimalFarm";
+        String category = "VirtualMachine.MobSpawner";
         BlockVirtualMachine.enable[TYPE] = VirtualMachines.CONFIG.get(category, "Enable", true);
 
-        String comment = "Adjust this value to change the Energy consumption (in RF/t) for a Virtual Animal Farm. This base value will scale with block level and Augments.";
+        String comment = "Adjust this value to change the Energy consumption (in RF/t) for a Virtual Mob Spawner. This base value will scale with block level and Augments.";
         basePower = VirtualMachines.CONFIG.getConfiguration().getInt("BasePower", category, basePower, MIN_BASE_POWER, MAX_BASE_POWER, comment);
 
         ENERGY_CONFIGS[TYPE] = new EnergyConfig();
         ENERGY_CONFIGS[TYPE].setDefaultParams(basePower, smallStorage);
     }
 
-    public static final List<String> ANIMAL_LIST = Lists.newArrayList("minecraft:chicken", "minecraft:pig", "minecraft:cow", "minecraft:sheep", "minecraft:rabbit", "minecraft:squid", "minecraft:mooshroom", "minecraft:horse", "minecraft:llama");
-    public static final List<String> RANCHABLE_ANIMAL_LIST = Lists.newArrayList("minecraft:chicken", "minecraft:cow", "minecraft:sheep", "minecraft:mooshroom");
-
-    private int inputTrackerPrimary;
-    private int inputTrackerSecondary;
+    private int inputTracker;
     private int outputTracker;
     private int outputTrackerFluid;
 
     private FluidTankCore tank = new FluidTankCore(TEProps.MAX_FLUID_LARGE);
 
     private boolean updateOutputs = true;
-    public VirtualAnimalFarm virtualAnimalFarm = new VirtualAnimalFarm();
+    public VirtualMobSpawner virtualMobSpawner = new VirtualMobSpawner();
 
     protected boolean augmentExperience;
     protected boolean flagExperience;
-    protected boolean augmentRancher;
     protected boolean augmentPermamorb;
+    protected boolean augmentMorbCapture;
 
-    public TileAnimalFarm()
+    public TileMobSpawner()
     {
         super();
 
-        inventory = new ItemStack[15]; // 4 + 9 + 1 + 1
+        inventory = new ItemStack[12]; // 9 + 1 + 1 + 1 = 12
         Arrays.fill(inventory, ItemStack.EMPTY);
         createAllSlots(inventory.length);
         tank.setLock(TFFluids.fluidExperience);
@@ -136,96 +131,38 @@ public class TileAnimalFarm extends TileVirtualMachine
     @Override
     protected boolean canStart()
     {
-        if (getStackInSlot(SLOT_ANIMAL_MORB).isEmpty() || getStackInSlot(SLOT_ANIMAL_MORB).getItem() != TEItems.itemMorb)
+        if (getStackInSlot(SLOT_SWORD).isEmpty() || getStackInSlot(SLOT_MORB).isEmpty())
             return false;
 
-        List<ItemStack> tools = Utils.arrayToListWithRange(inventory, SLOT_TOOLS_START, SLOT_TOOLS_START + 4);
-
-        if (tools.stream().allMatch(ItemStack::isEmpty))
-            return false;
-
-        ItemStack morbStack = getStackInSlot(SLOT_ANIMAL_MORB).copy();
-        List<ItemStack> outputs = virtualAnimalFarm.getOutputs();
+        List<ItemStack> outputs = virtualMobSpawner.getOutputs();
         if (updateOutputs)
         {
             outputs.clear();
+            ItemStack morbStack = getStackInSlot(SLOT_MORB);
 
-            if (!morbStack.hasTagCompound() || !ANIMAL_LIST.contains(morbStack.getTagCompound().getString("id")))
-                return false;
+            CentrifugeRecipe recipe = CentrifugeManager.getRecipeMob(morbStack);
 
-            if (augmentRancher)
+            if (recipe != null)
             {
-                if (RANCHABLE_ANIMAL_LIST.contains(morbStack.getTagCompound().getString("id")))
+                if (augmentMorbCapture)
                 {
-                    String id = morbStack.getTagCompound().getString("id");
+                    if (getStackInSlot(SLOT_SWORD).getItem() != TEItems.itemMorb)
+                        return false;
 
-                    if (id.equals("minecraft:chicken"))
-                    {
-                        for (int itx = SLOT_TOOLS_START; itx < SLOT_TOOLS_START + 4; itx++)
-                        {
-                            ItemStack s = getStackInSlot(itx);
-                            if (Utils.checkTool(s, "shears"))
-                            {
-                                int damage = world.rand.nextInt(3);
-                                outputs.add(new ItemStack(Items.FEATHER, damage));
-                                s = Utils.damageItem(s, damage, world.rand);
+                    ItemStack morbOutput = ItemStack.areItemsEqual(getStackInSlot(SLOT_SWORD), ItemMorb.morbStandard) ? ItemMorb.morbStandard.copy() : ItemMorb.morbReusable.copy();
+                    NBTTagCompound morbNBT = morbStack.getTagCompound();
+                    if (morbNBT != null && ItemMorb.validMobs.contains(morbNBT.getString("id")))
+                        ItemMorb.setTag(morbOutput, morbNBT.getString("id"), false);
 
-                                setInventorySlotContents(itx, s);
-                            }
-                        }
-                    }
+                    outputs.add(morbOutput);
 
-                    if (id.equals("minecraft:cow"))
-                    {
-                        for (int itx = SLOT_TOOLS_START; itx < SLOT_TOOLS_START + 4; itx++)
-                        {
-                            ItemStack s = getStackInSlot(itx);
-                            if (s.getItem() == Items.BUCKET)
-                            {
-                                s.shrink(1);
-                                setInventorySlotContents(itx, s);
-                                outputs.add(new ItemStack(Items.MILK_BUCKET));
-                            }
-                        }
-                    }
+                    getStackInSlot(SLOT_SWORD).shrink(1);
 
-                    if (id.equals("minecraft:sheep"))
-                    {
-                        for (int itx = SLOT_TOOLS_START; itx < SLOT_TOOLS_START + 4; itx++)
-                        {
-                            ItemStack s = getStackInSlot(itx);
-                            if (Utils.checkTool(s, "shears"))
-                            {
-                                int damage = world.rand.nextInt(2) + 1;
-                                outputs.add(new ItemStack(Blocks.WOOL, damage));
-                                s = Utils.damageItem(s, damage, world.rand);
+                    virtualMobSpawner.setOutputs(outputs);
+                    updateOutputs = false;
 
-                                setInventorySlotContents(itx, s);
-                            }
-                        }
-                    }
-
-                    if (id.equals("minecraft:mooshroom"))
-                    {
-                        for (int itx = SLOT_TOOLS_START; itx < SLOT_TOOLS_START + 4; itx++)
-                        {
-                            ItemStack s = getStackInSlot(itx);
-                            if (s.getItem() == Items.BOWL)
-                            {
-                                s.shrink(1);
-                                setInventorySlotContents(itx, s);
-                                outputs.add(new ItemStack(Items.MUSHROOM_STEW));
-                            }
-                        }
-                    }
+                    return Utils.canFitOutputs(this, outputs, SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9);
                 }
-            }
-            else
-            {
-                if (!tools.stream().findAny().filter(s -> Utils.checkTool(s, "sword")).isPresent())
-                    return false;
-
-                CentrifugeRecipe recipe = CentrifugeManager.getRecipeMob(morbStack);
 
                 List<ItemStack> recipeOutputs = recipe.getOutput();
                 List<Integer> chances = recipe.getChance();
@@ -244,51 +181,41 @@ public class TileAnimalFarm extends TileVirtualMachine
                     }
                 }
 
+                if (!augmentPermamorb)
+                {
+                    ItemStack morbOutput = ItemStack.areItemsEqual(getStackInSlot(SLOT_MORB), ItemMorb.morbStandard) ? ItemMorb.morbStandard.copy() : ItemMorb.morbReusable.copy();
+                    setInventorySlotContents(SLOT_MORB, morbOutput);
+                }
+
                 outputs.removeIf(s -> s.getItem() == TEItems.itemMorb);
-            }
-        }
-
-        if (!augmentPermamorb)
-        {
-            ItemStack morbOutput = ItemStack.areItemsEqual(getStackInSlot(SLOT_ANIMAL_MORB), ItemMorb.morbStandard) ? ItemMorb.morbStandard.copy() : ItemMorb.morbReusable.copy();
-            outputs.add(morbOutput);
-            getStackInSlot(SLOT_ANIMAL_MORB).shrink(1);
-        }
-
-        for (int itx = SLOT_TOOLS_START; itx < SLOT_TOOLS_START + 4; itx++)
-        {
-            if (Utils.checkTool(getStackInSlot(itx), "sword"))
-            {
-                int it = itx;
                 outputs.forEach(stack ->
                 {
-                    float f = (float) EnchantmentHelper.getEnchantmentLevel(Enchantments.LOOTING, getStackInSlot(it)) * world.rand.nextFloat();
+                    float f = (float) EnchantmentHelper.getEnchantmentLevel(Enchantments.LOOTING, getStackInSlot(SLOT_SWORD)) * world.rand.nextFloat();
                     stack.grow(Math.round(f));
                 });
-                break;
+                virtualMobSpawner.setOutputs(outputs);
+                updateOutputs = false;
+            }
+            else
+            {
+                return false;
             }
         }
 
-        virtualAnimalFarm.setOutputs(outputs);
-        updateOutputs = false;
-
-        return !outputs.isEmpty() && Utils.canFitOutputs(this, outputs, SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9);
+        return Utils.canFitOutputs(this, outputs, SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9);
     }
 
     @Override
     protected boolean hasValidInput()
     {
-        if (augmentRancher)
-            return true;
-
-        List<ItemStack> tools = Utils.arrayToListWithRange(inventory, SLOT_TOOLS_START, SLOT_TOOLS_START + 4);
-        return !tools.stream().allMatch(ItemStack::isEmpty);
+        ItemStack swordStack = getStackInSlot(SLOT_SWORD);
+        return augmentMorbCapture ? swordStack.isEmpty() || swordStack.getItem() == TEItems.itemMorb : Utils.checkTool(swordStack, "sword");
     }
 
     @Override
     protected void processStart()
     {
-        double maxProcess = 24000;
+        double maxProcess = 32000;
 
         processMax = (int) maxProcess;
         processRem = processMax;
@@ -297,7 +224,7 @@ public class TileAnimalFarm extends TileVirtualMachine
     @Override
     protected void processFinish()
     {
-        List<ItemStack> outputs = virtualAnimalFarm.getOutputs();
+        List<ItemStack> outputs = virtualMobSpawner.getOutputs();
 
         int damage = 0;
         for (ItemStack itemStack : outputs)
@@ -306,15 +233,12 @@ public class TileAnimalFarm extends TileVirtualMachine
             damage++;
         }
 
-        for (int itx = SLOT_TOOLS_START; itx < SLOT_TOOLS_START + 4; itx++)
+        if (!augmentMorbCapture)
         {
-            ItemStack damagedSwordStack = getStackInSlot(itx);
-            if (Utils.checkTool(damagedSwordStack, "sword"))
-            {
-                damagedSwordStack = Utils.damageItem(damagedSwordStack, damage, world.rand);
-                setInventorySlotContents(itx, damagedSwordStack);
-                break;
-            }
+            ItemStack damagedSwordStack = getStackInSlot(SLOT_SWORD);
+            damagedSwordStack = Utils.damageItem(damagedSwordStack, damage, world.rand);
+
+            setInventorySlotContents(SLOT_SWORD, damagedSwordStack);
         }
 
         if (augmentExperience && damage > 0)
@@ -330,25 +254,12 @@ public class TileAnimalFarm extends TileVirtualMachine
             return;
 
         int side;
-        for (int i = inputTrackerPrimary + 1; i <= inputTrackerPrimary + 6; i++)
+        for (int i = inputTracker + 1; i <= inputTracker + 6; i++)
         {
             side = i % 6;
-            for (int slot = SLOT_TOOLS_START; slot < SLOT_TOOLS_START + 4; slot++)
+            if (extractItem(SLOT_SWORD, ITEM_TRANSFER[level], EnumFacing.VALUES[side]))
             {
-                if (extractItem(SLOT_TOOLS_START, ITEM_TRANSFER[level], EnumFacing.VALUES[side]))
-                {
-                    inputTrackerPrimary = side;
-                    break;
-                }
-            }
-        }
-
-        for (int i = inputTrackerSecondary + 1; i <= inputTrackerSecondary + 6; i++)
-        {
-            side = i % 6;
-            if (extractItem(SLOT_ANIMAL_MORB, ITEM_TRANSFER[level], EnumFacing.VALUES[side]))
-            {
-                inputTrackerSecondary = side;
+                inputTracker = side;
                 break;
             }
         }
@@ -408,13 +319,13 @@ public class TileAnimalFarm extends TileVirtualMachine
     @Override
     public Object getGuiClient(InventoryPlayer inventory)
     {
-        return new GuiAnimalFarm(inventory, this);
+        return new GuiMobSpawner(inventory, this);
     }
 
     @Override
     public Object getGuiServer(InventoryPlayer inventory)
     {
-        return new ContainerAnimalFarm(inventory, this);
+        return new ContainerMobSpawner(inventory, this);
     }
 
     @Override
@@ -434,18 +345,22 @@ public class TileAnimalFarm extends TileVirtualMachine
         return augmentExperience && flagExperience;
     }
 
+    public boolean augmentMorbCapture()
+    {
+        return augmentMorbCapture;
+    }
+
     @Override
     public void readFromNBT(NBTTagCompound nbt)
     {
         super.readFromNBT(nbt);
 
-        inputTrackerPrimary = nbt.getInteger("TrackIn1");
-        inputTrackerSecondary = nbt.getInteger("TrackIn2");
+        inputTracker = nbt.getInteger("TrackIn");
         outputTracker = nbt.getInteger("TrackOut");
         outputTrackerFluid = nbt.getInteger("TrackOutFluid");
         updateOutputs = nbt.getBoolean("UpdateOutputs");
         tank.readFromNBT(nbt);
-        virtualAnimalFarm.readFromNBT(nbt);
+        virtualMobSpawner.readFromNBT(nbt);
     }
 
     @Override
@@ -453,13 +368,12 @@ public class TileAnimalFarm extends TileVirtualMachine
     {
         super.writeToNBT(nbt);
 
-        nbt.setInteger("TrackIn1", inputTrackerPrimary);
-        nbt.setInteger("TrackIn2", inputTrackerSecondary);
+        nbt.setInteger("TrackIn", inputTracker);
         nbt.setInteger("TrackOut", outputTracker);
         nbt.setInteger("TrackOutFluid", outputTrackerFluid);
         nbt.setBoolean("UpdateOutputs", updateOutputs);
         tank.writeToNBT(nbt);
-        virtualAnimalFarm.writeToNBT(nbt);
+        virtualMobSpawner.writeToNBT(nbt);
         return nbt;
     }
 
@@ -481,9 +395,9 @@ public class TileAnimalFarm extends TileVirtualMachine
         PacketBase payload = super.getGuiPacket();
 
         payload.addBool(augmentExperience);
-        payload.addBool(augmentRancher);
-        payload.addBool(augmentPermamorb);
         payload.addFluidStack(tank.getFluid());
+        payload.addBool(augmentPermamorb);
+        payload.addBool(augmentMorbCapture);
 
         return payload;
     }
@@ -494,10 +408,10 @@ public class TileAnimalFarm extends TileVirtualMachine
         super.handleGuiPacket(payload);
 
         augmentExperience = payload.getBool();
-        augmentRancher = payload.getBool();
-        augmentPermamorb = payload.getBool();
         flagExperience = augmentExperience;
         tank.setFluid(payload.getFluidStack());
+        augmentPermamorb = payload.getBool();
+        augmentMorbCapture = payload.getBool();
     }
 
     @Override
@@ -506,8 +420,8 @@ public class TileAnimalFarm extends TileVirtualMachine
         super.preAugmentInstall();
 
         augmentExperience = false;
-        augmentRancher = false;
         augmentPermamorb = false;
+        augmentMorbCapture = false;
     }
 
     @Override
@@ -527,9 +441,9 @@ public class TileAnimalFarm extends TileVirtualMachine
     {
         if (augmentExperience && VMConstants.MACHINE_EXPERIENCE.equals(id))
             return false;
-        if (augmentRancher && VMConstants.MACHINE_RANCHER.equals(id))
-            return false;
         if (augmentPermamorb && VMConstants.MACHINE_PERMAMORB.equals(id))
+            return false;
+        if (augmentMorbCapture && VMConstants.MACHINE_MORB_CAPTURE.equals(id))
             return false;
 
         return super.isValidAugment(type, id);
@@ -548,18 +462,17 @@ public class TileAnimalFarm extends TileVirtualMachine
             return true;
         }
 
-        if (!augmentRancher && VMConstants.MACHINE_RANCHER.equals(id))
-        {
-            augmentRancher = true;
-            hasModeAugment = true;
-            energyMod += RANCHER_MOD;
-            return true;
-        }
-
         if (!augmentPermamorb && VMConstants.MACHINE_PERMAMORB.equals(id))
         {
             augmentPermamorb = true;
             energyMod += PERMAMORB_MOD;
+            return true;
+        }
+
+        if (!augmentMorbCapture && VMConstants.MACHINE_MORB_CAPTURE.equals(id))
+        {
+            augmentMorbCapture = true;
+            energyMod += MORB_CAPTURE_MOD;
             return true;
         }
 
@@ -569,13 +482,13 @@ public class TileAnimalFarm extends TileVirtualMachine
     @Override
     public boolean isItemValidForSlot(int slot, ItemStack stack)
     {
-        if (slot == SLOT_ANIMAL_MORB)
+        if (slot == SLOT_SWORD)
+        {
+            return augmentMorbCapture ? stack.getItem() == TEItems.itemMorb : Utils.checkTool(stack, "sword");
+        }
+        if (slot == SLOT_MORB)
         {
             return stack.getItem() == TEItems.itemMorb;
-        }
-        else if (Utils.isSlotInRange(slot, SLOT_TOOLS_START, SLOT_TOOLS_START + 4))
-        {
-            return Utils.checkTool(stack, "sword") || stack.getItem() instanceof ItemShears || stack.getItem() == Items.BOWL || stack.getItem() == Items.BUCKET;
         }
 
         return false;
@@ -644,6 +557,6 @@ public class TileAnimalFarm extends TileVirtualMachine
     @Override
     public IVirtualMachine getVirtualMachine()
     {
-        return virtualAnimalFarm;
+        return virtualMobSpawner;
     }
 }

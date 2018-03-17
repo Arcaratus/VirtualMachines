@@ -111,7 +111,7 @@ public class VirtualFarm implements IVirtualMachine
 
         // Stems
         {
-            defaultWater = 400;
+            defaultWater = 500;
             defaultEnergy = 3600;
 
             defaultHandler.register(new ItemStack(Items.PUMPKIN_SEEDS), ezPairs(new double[][] { simpleDrop }, new ItemStack(Blocks.PUMPKIN)), defaultWater, defaultEnergy);
@@ -130,7 +130,7 @@ public class VirtualFarm implements IVirtualMachine
 
         // Saplings
         {
-            defaultWater = 800;
+            defaultWater = 1000;
             defaultEnergy = 6000;
 
             final double[] saplingDrops = new double[] { 0.0629, 0.1798, 0.2483, 0.2265, 0.1517, 0.08, 0.0345, 0.0127 };

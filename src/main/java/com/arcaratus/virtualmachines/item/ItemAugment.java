@@ -9,6 +9,7 @@ import cofh.core.util.helpers.*;
 import cofh.thermalexpansion.item.ItemMorb;
 import cofh.thermalfoundation.init.TFFluids;
 import cofh.thermalfoundation.item.ItemMaterial;
+import cofh.thermalfoundation.item.tome.ItemTomeExperience;
 import com.arcaratus.virtualmachines.VirtualMachines;
 import com.arcaratus.virtualmachines.init.VMConstants;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -41,6 +42,7 @@ public class ItemAugment extends ItemMulti implements IInitializer, IAugmentItem
     public static ItemStack machine_nether;
     public static ItemStack machine_rancher;
     public static ItemStack machine_permamorb;
+    public static ItemStack machine_morb_capture;
 
     public ItemAugment()
     {
@@ -207,6 +209,7 @@ public class ItemAugment extends ItemMulti implements IInitializer, IAugmentItem
         machine_nether = addAugmentItem(metadata++, VMConstants.MACHINE_NETHER, AugmentType.ADVANCED);
         machine_rancher = addAugmentItem(metadata++, VMConstants.MACHINE_RANCHER, AugmentType.MODE);
         machine_permamorb = addAugmentItem(metadata++, VMConstants.MACHINE_PERMAMORB, AugmentType.ADVANCED);
+        machine_morb_capture = addAugmentItem(metadata++, VMConstants.MACHINE_MORB_CAPTURE, AugmentType.MODE);
 
         VirtualMachines.proxy.addIModelRegister(this);
 
@@ -231,11 +234,12 @@ public class ItemAugment extends ItemMulti implements IInitializer, IAugmentItem
         addShapedRecipe(machine_experience,
                 " G ",
                 "PCP",
-                "SSS",
+                "SLS",
                 'G', "gearSignalum",
                 'P', "plateLumium",
                 'C', ItemMaterial.powerCoilElectrum,
-                'S', FluidUtil.getFilledBucket(new FluidStack(TFFluids.fluidExperience, Fluid.BUCKET_VOLUME))
+                'S', FluidUtil.getFilledBucket(new FluidStack(TFFluids.fluidExperience, Fluid.BUCKET_VOLUME)),
+                'L', ItemTomeExperience.tomeExperience
         );
 
         addShapedRecipe(machine_nether,
@@ -268,6 +272,17 @@ public class ItemAugment extends ItemMulti implements IInitializer, IAugmentItem
                 'P', "plateSteel",
                 'C', ItemMaterial.powerCoilElectrum,
                 'S', Items.NETHER_STAR,
+                'M', ItemMorb.morbReusable
+        );
+
+        addShapedRecipe(machine_morb_capture,
+                " G ",
+                "PCP",
+                "SMS",
+                'G', "gearLumium",
+                'P', "plateElectrum",
+                'C', ItemMaterial.powerCoilElectrum,
+                'S', "blockSlime",
                 'M', ItemMorb.morbReusable
         );
 

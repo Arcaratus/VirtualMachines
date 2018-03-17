@@ -33,6 +33,11 @@
 				"textures": {
 					"layer0": "virtualmachines:items/augment/machine_permamorb"
 				}
+			},
+			"machinemorbcapture": {
+				"textures": {
+					"layer0": "virtualmachines:items/augment/machine_morb_capture"
+				}
 			}
 		}
 	}

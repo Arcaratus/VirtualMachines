@@ -1,4 +1,15 @@
 ------------------------------------------------------
+Version 1.0.0.3
+------------------------------------------------------
+
+- Added in the Virtual Mob Spawner
+- Added in the Mob Capturer Augment
+- Added in the Virtual Mob Farm
+- Expanded the water tank capacity of the Virtual Farm
+- Increased water costs of a few farm recipes
+- Increased time needed for spawners
+
+------------------------------------------------------
 Version 1.0.0.2
 ------------------------------------------------------
 

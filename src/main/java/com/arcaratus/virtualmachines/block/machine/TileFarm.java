@@ -90,7 +90,7 @@ public class TileFarm extends TileVirtualMachine
     public boolean lockPrimary = false;
     private List<ItemStack> itemLocks = new ArrayList<>();
 
-    private FluidTankCore tank = new FluidTankCore(TEProps.MAX_FLUID_LARGE);
+    private FluidTankCore tank = new FluidTankCore(Fluid.BUCKET_VOLUME * 25);
 
     protected boolean augmentSoil;
     protected boolean augmentMonoculture;
@@ -201,7 +201,7 @@ public class TileFarm extends TileVirtualMachine
     @Override
     protected void processStart()
     {
-        double maxProcess = 0;
+        double maxProcess = 8000;
 
         for (int i = 0; i < 9; i++)
         {
