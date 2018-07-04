@@ -30,7 +30,7 @@ public class VMItems
         initList.add(item_augment);
 
         for (IInitializer init : initList)
-            init.initialize();
+            init.preInit();
 
         MinecraftForge.EVENT_BUS.register(INSTANCE);
     }
@@ -39,6 +39,6 @@ public class VMItems
     public void registerRecipes(RegistryEvent.Register<IRecipe> event)
     {
         for (IInitializer init : initList)
-            init.register();
+            init.initialize();
     }
 }

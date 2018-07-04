@@ -2,6 +2,7 @@ package com.arcaratus.virtualmachines.block.machine;
 
 import cofh.core.fluid.FluidTankCore;
 import cofh.core.network.PacketBase;
+import cofh.core.util.core.*;
 import cofh.thermalexpansion.init.TEProps;
 import cofh.thermalexpansion.util.managers.device.FisherManager;
 import com.arcaratus.virtualmachines.VirtualMachines;
@@ -10,8 +11,8 @@ import com.arcaratus.virtualmachines.block.BlockVirtualMachine.Type;
 import com.arcaratus.virtualmachines.gui.client.machine.GuiFishery;
 import com.arcaratus.virtualmachines.gui.container.machine.ContainerFishery;
 import com.arcaratus.virtualmachines.utils.Utils;
-import com.arcaratus.virtualmachines.virtual.VirtualFishery;
 import com.arcaratus.virtualmachines.virtual.IVirtualMachine;
+import com.arcaratus.virtualmachines.virtual.VirtualFishery;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
@@ -28,6 +29,8 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.IntStream;
+
+import static cofh.core.util.core.SideConfig.*;
 
 public class TileFishery extends TileVirtualMachine
 {
@@ -46,6 +49,12 @@ public class TileFishery extends TileVirtualMachine
         SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, { SLOT_FISHING_ROD, SLOT_BAIT }, IntStream.range(SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9).toArray(), { SLOT_FISHING_ROD }, { SLOT_BAIT }, {}, IntStream.range(0, 12).toArray() };
         SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, INPUT_ALL, OUTPUT_ALL, INPUT_PRIMARY, INPUT_SECONDARY, OPEN, OMNI };
         SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 3, 1, 2, 2, 2, 2 };
+
+        ALT_SIDE_CONFIGS[TYPE] = new SideConfig();
+        ALT_SIDE_CONFIGS[TYPE].numConfig = 2;
+        ALT_SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, { SLOT_FISHING_ROD, SLOT_BAIT }, IntStream.range(SLOT_OUTPUT_START, SLOT_OUTPUT_START + 9).toArray(), { SLOT_FISHING_ROD }, { SLOT_BAIT }, {}, IntStream.range(0, 12).toArray() };
+        ALT_SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, OPEN };
+        ALT_SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 1, 1, 1, 1, 1, 1 };
 
         SLOT_CONFIGS[TYPE] = new SlotConfig();
         SLOT_CONFIGS[TYPE].allowInsertionSlot = new boolean[] { true, true, false, false, false, false, false, false, false, false, false };

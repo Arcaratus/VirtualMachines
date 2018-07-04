@@ -1,13 +1,13 @@
 package com.arcaratus.virtualmachines.gui.container.machine;
 
+import cofh.core.gui.container.ContainerTileAugmentable;
 import cofh.core.gui.slot.*;
-import cofh.thermalexpansion.gui.container.ContainerTEBase;
 import com.arcaratus.virtualmachines.block.machine.TileDarkRoom;
 import com.arcaratus.virtualmachines.utils.Utils;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.tileentity.TileEntity;
 
-public class ContainerDarkRoom extends ContainerTEBase
+public class ContainerDarkRoom extends ContainerTileAugmentable
 {
     TileDarkRoom myTile;
 

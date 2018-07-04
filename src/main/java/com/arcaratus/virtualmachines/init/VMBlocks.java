@@ -26,7 +26,7 @@ public class VMBlocks
         initList.add(virtual_machine);
 
         for (IInitializer init : initList)
-            init.initialize();
+            init.preInit();
 
         MinecraftForge.EVENT_BUS.register(INSTANCE);
     }
@@ -35,6 +35,6 @@ public class VMBlocks
     public void registerRecipes(RegistryEvent.Register<IRecipe> event)
     {
         for (IInitializer init : initList)
-            init.register();
+            init.initialize();
     }
 }

@@ -3,6 +3,7 @@ package com.arcaratus.virtualmachines.block.machine;
 import cofh.api.item.IAugmentItem.AugmentType;
 import cofh.core.fluid.FluidTankCore;
 import cofh.core.network.PacketBase;
+import cofh.core.util.core.*;
 import cofh.core.util.helpers.AugmentHelper;
 import cofh.thermalexpansion.init.TEProps;
 import cofh.thermalexpansion.util.managers.machine.InsolatorManager;
@@ -35,6 +36,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static cofh.core.util.core.SideConfig.*;
+
 public class TileFarm extends TileVirtualMachine
 {
     private static final int TYPE = Type.FARM.getMetadata();
@@ -54,6 +57,12 @@ public class TileFarm extends TileVirtualMachine
         SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, IntStream.range(SLOT_TOOLS_START, 33).toArray(), IntStream.range(0, SLOT_TOOLS_START).toArray(), {}, IntStream.range(SLOT_FARM_START, 33).toArray(), IntStream.range(SLOT_TOOLS_START, SLOT_FARM_START).toArray(), IntStream.range(0, 33).toArray() };
         SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, INPUT_ALL, OUTPUT_ALL, OPEN, INPUT_PRIMARY, INPUT_SECONDARY, OMNI };
         SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 3, 1, 2, 2, 2, 2 };
+
+        ALT_SIDE_CONFIGS[TYPE] = new SideConfig();
+        ALT_SIDE_CONFIGS[TYPE].numConfig = 2;
+        ALT_SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, IntStream.range(SLOT_TOOLS_START, 33).toArray(), IntStream.range(0, SLOT_TOOLS_START).toArray(), {}, IntStream.range(SLOT_FARM_START, 33).toArray(), IntStream.range(SLOT_TOOLS_START, SLOT_FARM_START).toArray(), IntStream.range(0, 33).toArray() };
+        ALT_SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, OPEN };
+        ALT_SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 1, 1, 1, 1, 1, 1 };
 
         SLOT_CONFIGS[TYPE] = new SlotConfig();
         SLOT_CONFIGS[TYPE].allowInsertionSlot = new boolean[] { false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, true, true, true, true, true, true, true, true, true, true, true, true, true };
@@ -479,6 +488,7 @@ public class TileFarm extends TileVirtualMachine
         return nbt;
     }
 
+    /* CLIENT -> SERVER */
     @Override
     public PacketBase getModePacket()
     {
@@ -524,6 +534,8 @@ public class TileFarm extends TileVirtualMachine
 
         callNeighborTileChange();
     }
+
+    /* SERVER -> CLIENT */
 
     @Override
     public PacketBase getGuiPacket()

@@ -24,12 +24,12 @@ public class VMPlugins
         initList.add(pluginXU2);
 
         for (IInitializer init : initList)
-            init.initialize();
+            init.preInit();
     }
 
     public static void postInit()
     {
         for (IInitializer init : initList)
-            init.register();
+            init.initialize();
     }
 }

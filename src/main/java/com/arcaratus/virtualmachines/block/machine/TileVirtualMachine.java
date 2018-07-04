@@ -4,17 +4,18 @@ import cofh.api.core.IAccelerable;
 import cofh.api.item.IAugmentItem.AugmentType;
 import cofh.api.item.IUpgradeItem;
 import cofh.api.item.IUpgradeItem.UpgradeType;
+import cofh.core.block.TilePowered;
 import cofh.core.init.CoreProps;
 import cofh.core.network.PacketBase;
 import cofh.core.util.TimeTracker;
+import cofh.core.util.core.*;
 import cofh.core.util.helpers.*;
 import cofh.redstoneflux.impl.EnergyStorage;
 import cofh.thermalexpansion.ThermalExpansion;
-import cofh.thermalexpansion.block.TilePowered;
 import cofh.thermalexpansion.block.machine.BlockMachine;
 import cofh.thermalexpansion.init.TEProps;
 import cofh.thermalexpansion.init.TETextures;
-import cofh.thermalfoundation.init.TFProps;
+import com.arcaratus.virtualmachines.VirtualMachines;
 import com.arcaratus.virtualmachines.block.BlockVirtualMachine.Type;
 import com.arcaratus.virtualmachines.init.VMTextures;
 import com.arcaratus.virtualmachines.virtual.IVirtualMachine;
@@ -25,15 +26,18 @@ import net.minecraft.util.*;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.relauncher.Side;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 /**
- *  Literal carbon copy of TileMachineBase in Thermal Expansion
- *  Needed here to make accessing necessary fields less of a PITA
+ * Literal carbon copy of TileMachineBase in Thermal Expansion
+ * Needed here to make accessing necessary fields less of a PITA
  */
 public abstract class TileVirtualMachine extends TilePowered implements IAccelerable, ITickable
 {
     public static final SideConfig[] SIDE_CONFIGS = new SideConfig[Type.values().length];
+    public static final SideConfig[] ALT_SIDE_CONFIGS = new SideConfig[Type.values().length];
+
     public static final SlotConfig[] SLOT_CONFIGS = new SlotConfig[Type.values().length];
     public static final EnergyConfig[] ENERGY_CONFIGS = new EnergyConfig[Type.values().length];
     public static final HashSet<String>[] VALID_AUGMENTS = new HashSet[Type.values().length];
@@ -42,17 +46,26 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
     public static final int MIN_BASE_POWER = 10;
     public static final int MAX_BASE_POWER = 200;
     public static final int[] POWER_SCALING = { 100, 150, 200, 250, 300 };
-    public static final int[] CUSTOM_POWER_SCALING = { 100, 150, 250, 400, 600 };
+    public static int[] ENERGY_SCALING = { 100, 100, 100, 100, 100 };
+    public static byte[] NUM_AUGMENTS = { 0, 1, 2, 3, 4 };
 
     protected static boolean enableCreative = false;
     protected static boolean enableSecurity = true;
-    protected static boolean customScaling = false;
+    protected static boolean enableUpgrades = true;
+    protected static boolean customAugmentScaling = false;
+    protected static boolean customPowerScaling = false;
+    protected static boolean customEnergyScaling = false;
+    public static boolean disableAutoInput = false;
+    public static boolean disableAutoOutput = false;
     protected static boolean smallStorage = false;
 
     protected static final HashSet<String> VALID_AUGMENTS_BASE = new HashSet<>();
     protected static final int ENERGY_BASE = 100;
     protected static final int POWER_BASE = 100;
     protected static final int SECONDARY_BASE = 100;
+    protected static final int SECONDARY_MIN = 5;
+    protected static final int REUSE_BASE = 0;
+    protected static final int REUSE_MAX = 95;
 
     static
     {
@@ -65,42 +78,110 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
         String comment = "If TRUE, Machines are securable.";
         enableSecurity = ThermalExpansion.CONFIG.get(category, "Securable", true, comment);
 
+        comment = "If TRUE, Machines are upgradable. If disabled, be sure and change the Augment Scaling config options as well.";
+        enableUpgrades = ThermalExpansion.CONFIG.get(category, "Upgradable", enableUpgrades, comment);
+
         comment = "If TRUE, 'Classic' Crafting is enabled - Non-Creative Upgrade Kits WILL NOT WORK in a Crafting Grid.";
         BlockMachine.enableClassicRecipes = ThermalExpansion.CONFIG.get(category, "ClassicCrafting", BlockMachine.enableClassicRecipes, comment);
 
         comment = "If TRUE, Machines can be upgraded in a Crafting Grid using Kits. If Classic Crafting is enabled, only the Creative Conversion Kit may be used in this fashion.";
         BlockMachine.enableUpgradeKitCrafting = ThermalExpansion.CONFIG.get(category, "UpgradeKitCrafting", BlockMachine.enableUpgradeKitCrafting, comment);
 
-        comment = "If TRUE, Machine RF scaling will use a custom set of values rather than default behavior. The default custom configuration provides a reasonable alternate progression.";
-        customScaling = ThermalExpansion.CONFIG.get(category, "CustomScaling", customScaling, comment);
+        comment = "If TRUE, Machine Augment Slot scaling will use a custom set of values rather than default behavior (1/level).";
+        customAugmentScaling = ThermalExpansion.CONFIG.get(category, "CustomAugmentScaling", customAugmentScaling, comment);
+
+        comment = "If TRUE, Machine RF/t (POWER) scaling will use a custom set of values rather than default behavior. The default custom configuration provides a reasonable alternate progression.";
+        customPowerScaling = ThermalExpansion.CONFIG.get(category, "CustomPowerScaling", customPowerScaling, comment);
+
+        comment = "If TRUE, Machine Total RF (ENERGY) scaling will use a custom set of values rather than default behavior (no scaling). The default custom configuration provides an alternate progression where machines use 5% additional total RF per tier.";
+        customEnergyScaling = ThermalExpansion.CONFIG.get(category, "CustomEnergyScaling", customEnergyScaling, comment);
+
+        comment = "If TRUE, Machines will no longer have Auto-Input functionality. Not recommended, but knock yourself out.";
+        disableAutoInput = ThermalExpansion.CONFIG.get(category, "DisableAutoInput", disableAutoInput, comment);
+
+        comment = "If TRUE, Machines will no longer have Auto-Output functionality. Not recommended, but knock yourself out.";
+        disableAutoOutput = ThermalExpansion.CONFIG.get(category, "DisableAutoOutput", disableAutoOutput, comment);
 
         comment = "If TRUE, Machines will have much smaller internal energy (RF) storage. Processing speed will no longer scale with internal energy.";
         smallStorage = ThermalExpansion.CONFIG.get(category, "SmallStorage", smallStorage, comment);
 
-        category = "Machine.CustomScaling";
-        comment = "ADVANCED FEATURE - ONLY EDIT IF YOU KNOW WHAT YOU ARE DOING.\nValues are expressed as a percentage of Base Power; Base Scale Factor is 100 percent.\nValues will be checked for validity and rounded down to the nearest 10.";
+        /* CUSTOM SCALING */
+        boolean validScaling;
+        byte[] customAugments = { 0, 1, 2, 3, 4 };
+        int[] customPowerScale = { 100, 150, 250, 400, 600 };
+        int[] customEnergyScale = { 100, 105, 110, 115, 120 };
 
+        category = "Machine.AugmentSlots";
+        comment = "Adjust the number of augments that Machines have at any given Level.\nProgression will be checked for validity - upgrading a block cannot result in fewer slots.";
         ThermalExpansion.CONFIG.getCategory(category).setComment(comment);
-        boolean validScaling = true;
+        validScaling = true;
 
-        for (int i = TFProps.LEVEL_MIN + 1; i <= TFProps.LEVEL_MAX; i++)
-            CUSTOM_POWER_SCALING[i] = ThermalExpansion.CONFIG.getConfiguration().getInt("Level" + i, category, CUSTOM_POWER_SCALING[i], POWER_BASE + 10 * i, POWER_BASE * ((i + 1) * (i + 1)), "Scale Factor for Level " + i + " Machines.");
+        for (int i = CoreProps.LEVEL_MIN; i <= CoreProps.LEVEL_MAX; i++)
+            customAugments[i] = (byte) ThermalExpansion.CONFIG.getConfiguration().getInt("Level" + i, category, customAugments[i], CoreProps.AUGMENT_MIN, CoreProps.AUGMENT_MAX, "Augment Slots for Level " + i + " Machines.");
 
-        for (int i = 1; i < CUSTOM_POWER_SCALING.length; i++)
+        for (int i = 1; i < customAugments.length; i++)
         {
-            CUSTOM_POWER_SCALING[i] /= 10;
-            CUSTOM_POWER_SCALING[i] *= 10;
-
-            if (CUSTOM_POWER_SCALING[i] <= CUSTOM_POWER_SCALING[i - 1])
+            if (customAugments[i] < customAugments[i - 1])
                 validScaling = false;
         }
 
-        if (customScaling)
+        if (customAugmentScaling)
         {
             if (!validScaling)
                 ThermalExpansion.LOG.error(category + " settings are invalid. They will not be used.");
             else
-                System.arraycopy(CUSTOM_POWER_SCALING, 0, POWER_SCALING, 0, POWER_SCALING.length);
+                System.arraycopy(customAugments, 0, NUM_AUGMENTS, 0, NUM_AUGMENTS.length);
+        }
+
+        category = "Machine.CustomPowerScaling";
+        comment = "ADVANCED FEATURE - ONLY EDIT IF YOU KNOW WHAT YOU ARE DOING.\nValues are expressed as a percentage of Base Power; Base Scale Factor is 100 percent.\nValues will be checked for validity and rounded down to the nearest 10.";
+        ThermalExpansion.CONFIG.getCategory(category).setComment(comment);
+        validScaling = true;
+
+        for (int i = CoreProps.LEVEL_MIN + 1; i <= CoreProps.LEVEL_MAX; i++)
+            customPowerScale[i] = ThermalExpansion.CONFIG.getConfiguration().getInt("Level" + i, category, customPowerScale[i], POWER_BASE, POWER_BASE * ((i + 1) * (i + 1)), "Scale Factor for Level " + i + " Machines.");
+
+
+        for (int i = 1; i < customPowerScale.length; i++)
+        {
+            customPowerScale[i] /= 10;
+            customPowerScale[i] *= 10;
+
+            if (customPowerScale[i] < customPowerScale[i - 1])
+                validScaling = false;
+        }
+
+        if (customPowerScaling)
+        {
+            if (!validScaling)
+                ThermalExpansion.LOG.error(category + " settings are invalid. They will not be used.");
+            else
+                System.arraycopy(customPowerScale, 0, POWER_SCALING, 0, POWER_SCALING.length);
+        }
+
+        category = "Machine.CustomEnergyScaling";
+        comment = "ADVANCED FEATURE - ONLY EDIT IF YOU KNOW WHAT YOU ARE DOING.\nValues are expressed as a percentage of Base Energy; Base Scale Factor is 100 percent.\nValues will be checked for validity and rounded down to the nearest 5.";
+        ThermalExpansion.CONFIG.getCategory(category).setComment(comment);
+        validScaling = true;
+
+        for (int i = CoreProps.LEVEL_MIN + 1; i <= CoreProps.LEVEL_MAX; i++)
+            customEnergyScale[i] = ThermalExpansion.CONFIG.getConfiguration().getInt("Level" + i, category, customEnergyScale[i], ENERGY_BASE, ENERGY_BASE * ((i + 1) * (i + 1)), "Scale Factor for Level " + i + " Machines.");
+
+        for (int i = 1; i < customEnergyScale.length; i++)
+        {
+            customEnergyScale[i] /= 20;
+            customEnergyScale[i] *= 20;
+
+            if (customEnergyScale[i] < customEnergyScale[i - 1])
+                validScaling = false;
+        }
+
+        if (customEnergyScaling)
+        {
+            if (!validScaling)
+                ThermalExpansion.LOG.error(category + " settings are invalid. They will not be used.");
+            else
+                System.arraycopy(customEnergyScale, 0, ENERGY_SCALING, 0, ENERGY_SCALING.length);
         }
     }
 
@@ -124,14 +205,45 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
         slotConfig = SLOT_CONFIGS[getType()];
         energyConfig = ENERGY_CONFIGS[getType()].copy();
         energyStorage = new EnergyStorage(energyConfig.maxEnergy, energyConfig.maxPower * 4);
+        Arrays.fill(augments, ItemStack.EMPTY);
         setDefaultSides();
         enableAutoOutput = true;
+    }
+
+    @Override
+    protected Object getMod()
+    {
+        return VirtualMachines.INSTANCE;
+    }
+
+    @Override
+    protected String getModVersion()
+    {
+        return VirtualMachines.VERSION;
     }
 
     @Override
     public String getTileName()
     {
         return "tile.virtualmachines." + Type.byMetadata(getType()).getName() + ".name";
+    }
+
+    @Override
+    protected int getLevelAutoInput()
+    {
+        return TEProps.levelAutoInput;
+    }
+
+    @Override
+    protected int getLevelAutoOutput()
+    {
+        return TEProps.levelAutoOutput;
+    }
+
+    @Override
+    protected int getLevelRSControl()
+    {
+        return TEProps.levelRedstoneControl;
     }
 
     @Override
@@ -144,6 +256,22 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
     public boolean enableSecurity()
     {
         return enableSecurity;
+    }
+
+    @Override
+    public boolean sendRedstoneUpdates()
+    {
+        return true;
+    }
+
+    @Override
+    public void onRedstoneUpdate()
+    {
+        boolean curActive = isActive;
+        if (!redstoneControlOrDisable())
+            isActive = false;
+
+        updateIfChanged(curActive);
     }
 
     /* IUpgradeable */
@@ -191,6 +319,23 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
         }
 
         return false;
+    }
+
+    @Override
+    protected int getNumAugmentSlots(int level)
+    {
+        return NUM_AUGMENTS[MathHelper.clamp(level, CoreProps.LEVEL_MIN, CoreProps.LEVEL_MAX)];
+    }
+
+    @Override
+    protected void setLevelFlags()
+    {
+        super.setLevelFlags();
+
+        if (disableAutoInput)
+            hasAutoInput = false;
+        if (disableAutoOutput)
+            hasAutoOutput = false;
     }
 
     @Override
@@ -242,7 +387,12 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
     /* COMMON METHODS */
     protected int getBasePower(int level)
     {
-        return ENERGY_CONFIGS[getType()].maxPower * POWER_SCALING[MathHelper.clamp(level, TFProps.LEVEL_MIN, TFProps.LEVEL_MAX)] / POWER_BASE;
+        return ENERGY_CONFIGS[getType()].maxPower * POWER_SCALING[MathHelper.clamp(level, CoreProps.LEVEL_MIN, CoreProps.LEVEL_MAX)] / POWER_BASE;
+    }
+
+    protected int getBaseEnergy(int level)
+    {
+        return ENERGY_SCALING[MathHelper.clamp(level, CoreProps.LEVEL_MIN, CoreProps.LEVEL_MAX)] / ENERGY_BASE;
     }
 
     protected int calcEnergy()
@@ -275,6 +425,10 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
     {
         return true;
     }
+
+    protected void clearRecipe() {}
+
+    protected void getRecipe() {}
 
     protected void processStart() {}
 
@@ -315,7 +469,7 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
 
             sendTilePacket(Side.CLIENT);
         }
-        else if (wasActive && tracker.hasDelayPassed(world, CoreProps.TILE_UPDATE_DELAY))
+        else if (wasActive && tracker.hasDelayPassed(world, CoreProps.tileUpdateDelay))
         {
             wasActive = false;
             if (LIGHT_VALUES[getType()] != 0)
@@ -407,6 +561,9 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
     protected void postAugmentInstall()
     {
         energyStorage.setCapacity(energyConfig.maxEnergy).setMaxTransfer(energyConfig.maxPower * 4);
+        energyMod *= getBaseEnergy(level);
+        secondaryChance = MathHelper.clamp(secondaryChance, SECONDARY_MIN, SECONDARY_BASE);
+        reuseChance = MathHelper.clamp(reuseChance, REUSE_BASE, REUSE_MAX);
     }
 
     @Override

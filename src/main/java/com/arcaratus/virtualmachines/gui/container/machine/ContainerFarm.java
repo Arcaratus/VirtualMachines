@@ -1,7 +1,8 @@
 package com.arcaratus.virtualmachines.gui.container.machine;
 
-import cofh.core.gui.slot.*;
-import cofh.thermalexpansion.gui.container.ContainerTEBase;
+import cofh.core.gui.container.ContainerTileAugmentable;
+import cofh.core.gui.slot.SlotEnergy;
+import cofh.core.gui.slot.SlotValidated;
 import cofh.thermalexpansion.util.managers.machine.InsolatorManager;
 import com.arcaratus.virtualmachines.block.machine.TileFarm;
 import com.arcaratus.virtualmachines.utils.Utils;
@@ -11,7 +12,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 
-public class ContainerFarm extends ContainerTEBase
+public class ContainerFarm extends ContainerTileAugmentable
 {
     TileFarm myTile;
 

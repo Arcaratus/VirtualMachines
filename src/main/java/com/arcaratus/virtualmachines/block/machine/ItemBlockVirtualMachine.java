@@ -4,7 +4,6 @@ import cofh.api.tileentity.IRedstoneControl;
 import cofh.core.util.helpers.*;
 import cofh.thermalexpansion.block.ItemBlockTEBase;
 import cofh.thermalexpansion.init.TEProps;
-import cofh.thermalexpansion.util.helpers.ReconfigurableHelper;
 import com.arcaratus.virtualmachines.block.BlockVirtualMachine;
 import com.arcaratus.virtualmachines.block.BlockVirtualMachine.Type;
 import net.minecraft.block.Block;

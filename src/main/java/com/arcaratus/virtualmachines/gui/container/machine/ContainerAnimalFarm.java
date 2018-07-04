@@ -1,13 +1,13 @@
 package com.arcaratus.virtualmachines.gui.container.machine;
 
+import cofh.core.gui.container.ContainerTileAugmentable;
 import cofh.core.gui.slot.*;
-import cofh.thermalexpansion.gui.container.ContainerTEBase;
 import cofh.thermalexpansion.init.TEItems;
 import com.arcaratus.virtualmachines.block.machine.TileAnimalFarm;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.tileentity.TileEntity;
 
-public class ContainerAnimalFarm extends ContainerTEBase
+public class ContainerAnimalFarm extends ContainerTileAugmentable
 {
     TileAnimalFarm myTile;
 

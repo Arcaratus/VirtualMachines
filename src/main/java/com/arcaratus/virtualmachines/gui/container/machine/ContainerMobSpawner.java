@@ -1,14 +1,14 @@
 package com.arcaratus.virtualmachines.gui.container.machine;
 
+import cofh.core.gui.container.ContainerTileAugmentable;
 import cofh.core.gui.slot.*;
-import cofh.thermalexpansion.gui.container.ContainerTEBase;
 import cofh.thermalexpansion.init.TEItems;
 import com.arcaratus.virtualmachines.block.machine.TileMobSpawner;
 import com.arcaratus.virtualmachines.utils.Utils;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.tileentity.TileEntity;
 
-public class ContainerMobSpawner extends ContainerTEBase
+public class ContainerMobSpawner extends ContainerTileAugmentable
 {
     TileMobSpawner myTile;
 

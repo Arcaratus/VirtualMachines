@@ -5,17 +5,15 @@ import codechicken.lib.model.bakery.*;
 import codechicken.lib.model.bakery.generation.IBakery;
 import codechicken.lib.texture.IWorldBlockTextureProvider;
 import codechicken.lib.texture.TextureUtils;
+import cofh.core.init.CoreProps;
 import cofh.core.render.IModelRegister;
-import cofh.core.util.helpers.BlockHelper;
-import cofh.core.util.helpers.FluidHelper;
+import cofh.core.util.helpers.*;
 import cofh.thermalexpansion.block.BlockTEBase;
 import cofh.thermalexpansion.block.device.BlockDevice;
 import cofh.thermalexpansion.block.machine.BlockMachine;
 import cofh.thermalexpansion.init.TEProps;
 import cofh.thermalexpansion.init.TETextures;
 import cofh.thermalexpansion.item.ItemAugment;
-import cofh.thermalexpansion.util.helpers.ReconfigurableHelper;
-import cofh.thermalfoundation.init.TFProps;
 import cofh.thermalfoundation.item.*;
 import com.arcaratus.virtualmachines.VirtualMachines;
 import com.arcaratus.virtualmachines.block.machine.*;
@@ -89,6 +87,7 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         // UnListed
         builder.add(ModelErrorStateProperty.ERROR_STATE);
         builder.add(VMConstants.TILE_VIRTUAL_MACHINE);
+        builder.add(TEProps.BAKERY_WORLD);
 
         return builder.build();
     }
@@ -100,9 +99,9 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         {
             if (enable[i])
             {
-                if (TEProps.creativeTabShowAllLevels)
+                if (TEProps.creativeTabShowAllBlockLevels)
                 {
-                    for (int j = 0; j <= TFProps.LEVEL_MAX; j++)
+                    for (int j = 0; j <= CoreProps.LEVEL_MAX; j++)
                     {
                         items.add(itemBlock.setDefaultTag(new ItemStack(this, 1, i), j));
                     }
@@ -212,7 +211,10 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
     @Override
     public boolean onBlockActivatedDelegate(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ)
     {
-        TileEntity tile = world.getTileEntity(pos);
+        TileVirtualMachine tile = (TileVirtualMachine) world.getTileEntity(pos);
+
+        if (tile == null || !tile.canPlayerAccess(player))
+            return false;
 
         if (tile.hasCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null))
         {
@@ -329,7 +331,7 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
     }
 
     @Override
-    public boolean initialize()
+    public boolean preInit()
     {
         setRegistryName("virtual_machine");
         ForgeRegistries.BLOCKS.register(this);
@@ -355,7 +357,7 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
     }
 
     @Override
-    public boolean register()
+    public boolean initialize()
     {
         virtual_farm = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.FARM.getMetadata()));
         virtual_fishery = itemBlock.setDefaultTag(new ItemStack(this, 1, Type.FISHERY.getMetadata()));

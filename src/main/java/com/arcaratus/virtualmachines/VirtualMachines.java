@@ -3,6 +3,8 @@ package com.arcaratus.virtualmachines;
 import cofh.core.gui.CreativeTabCore;
 import cofh.core.init.CoreProps;
 import cofh.core.util.ConfigHandler;
+import com.arcaratus.virtualmachines.gui.GuiHandler;
+import com.arcaratus.virtualmachines.init.*;
 import com.arcaratus.virtualmachines.item.ItemMaterial;
 import com.arcaratus.virtualmachines.proxy.CommonProxy;
 import net.minecraft.creativetab.CreativeTabs;
@@ -12,6 +14,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.*;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.logging.log4j.LogManager;
@@ -26,11 +29,15 @@ public class VirtualMachines
     public static final String VERSION = "@VERSION@";
     public static final String NAME = "Virtual Machines";
 
+    @Mod.Instance(MOD_ID)
+    public static VirtualMachines INSTANCE;
+
     @SidedProxy(serverSide = "com.arcaratus.virtualmachines.proxy.CommonProxy", clientSide = "com.arcaratus.virtualmachines.proxy.ClientProxy")
     public static CommonProxy proxy;
 
     public static final ConfigHandler CONFIG = new ConfigHandler(VERSION);
     public static final Logger LOGGER = LogManager.getLogger(VirtualMachines.NAME);
+    public static final GuiHandler GUI_HANDLER = new GuiHandler();
 
     public static CreativeTabs TAB_VIRTUAL_MACHINES = new CreativeTabCore(MOD_ID)
     {
@@ -47,6 +54,13 @@ public class VirtualMachines
     {
         CONFIG.setConfiguration(new Configuration(new File(CoreProps.configDir, "/cofh/" + MOD_ID + "/common.cfg"), true));
 //        CONFIG_CLIENT.setConfiguration(new Configuration(new File(CoreProps.configDir, "/cofh/" + MOD_ID + "/client.cfg"), true));
+
+        VMBlocks.preInit();
+        VMItems.preInit();
+
+        VMPlugins.preInit();
+
+        registerHandlers();
 
         proxy.preInit(e);
     }
@@ -69,5 +83,10 @@ public class VirtualMachines
         CONFIG.cleanUp(false, true);
 
         LOGGER.info(NAME + ": Load Complete.");
+    }
+
+    private void registerHandlers()
+    {
+        NetworkRegistry.INSTANCE.registerGuiHandler(INSTANCE, GUI_HANDLER);
     }
 }

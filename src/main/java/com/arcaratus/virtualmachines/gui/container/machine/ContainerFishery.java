@@ -1,14 +1,14 @@
 package com.arcaratus.virtualmachines.gui.container.machine;
 
+import cofh.core.gui.container.ContainerTileAugmentable;
 import cofh.core.gui.slot.*;
-import cofh.thermalexpansion.gui.container.ContainerTEBase;
 import cofh.thermalexpansion.util.managers.device.FisherManager;
 import com.arcaratus.virtualmachines.block.machine.TileFishery;
 import com.arcaratus.virtualmachines.utils.Utils;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.tileentity.TileEntity;
 
-public class ContainerFishery extends ContainerTEBase
+public class ContainerFishery extends ContainerTileAugmentable
 {
     TileFishery myTile;
 

@@ -9,6 +9,7 @@ import com.arcaratus.virtualmachines.VirtualMachines;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import static cofh.core.util.helpers.RecipeHelper.addShapedRecipe;
 
@@ -27,20 +28,21 @@ public class ItemMaterial extends ItemMulti implements IInitializer
     }
 
     @Override
-    public boolean initialize()
+    public boolean preInit()
     {
+        ForgeRegistries.ITEMS.register(setRegistryName("material"));
+        VirtualMachines.proxy.addIModelRegister(this);
+
         int number = 2560;
         virtual_machine_core_empty = addItem(number++, "virtual_machine_core_empty");
         virtual_machine_core_filled = addItem(number++, "virtual_machine_core_filled", EnumRarity.UNCOMMON);
         virtual_machine_core_flux = addItem(number++, "virtual_machine_core_flux", EnumRarity.RARE);
 
-        VirtualMachines.proxy.addIModelRegister(this);
-
         return true;
     }
 
     @Override
-    public boolean register()
+    public boolean initialize()
     {
         addShapedRecipe(virtual_machine_core_empty, "ESE", "SIS", "ESE", 'E', "plateElectrum", 'S', "plateSignalum", 'I', "gearInvar");
 

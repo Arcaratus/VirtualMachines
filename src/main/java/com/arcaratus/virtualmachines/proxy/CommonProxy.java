@@ -8,10 +8,6 @@ public class CommonProxy
 {
     public void preInit(FMLPreInitializationEvent e)
     {
-        VMBlocks.preInit();
-        VMItems.preInit();
-
-        VMPlugins.preInit();
     }
 
     public void init(FMLInitializationEvent e)

@@ -3,6 +3,7 @@ package com.arcaratus.virtualmachines.block.machine;
 import cofh.api.item.IAugmentItem.AugmentType;
 import cofh.core.fluid.FluidTankCore;
 import cofh.core.network.PacketBase;
+import cofh.core.util.core.*;
 import cofh.core.util.helpers.*;
 import cofh.thermalexpansion.init.TEItems;
 import cofh.thermalexpansion.item.ItemMorb;
@@ -33,6 +34,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static cofh.core.util.core.SideConfig.*;
+
 public class TileMobFarm extends TileVirtualMachine
 {
     private static final int TYPE = Type.MOB_FARM.getMetadata();
@@ -54,6 +57,12 @@ public class TileMobFarm extends TileVirtualMachine
         SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, IntStream.range(SLOT_SWORD, SLOT_MORB_START + 9).toArray(), IntStream.range(SLOT_OUTPUT_START, SLOT_OUTPUT_START + 18).toArray(), { SLOT_SWORD }, IntStream.range(SLOT_MORB_START, SLOT_MORB_START + 9).toArray(), {}, IntStream.range(SLOT_SWORD, SLOT_OUTPUT_START + 18).toArray() };
         SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, INPUT_ALL, OUTPUT_ALL, INPUT_PRIMARY, INPUT_SECONDARY, OPEN, OMNI };
         SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 3, 1, 2, 2, 2, 2 };
+
+        ALT_SIDE_CONFIGS[TYPE] = new SideConfig();
+        ALT_SIDE_CONFIGS[TYPE].numConfig = 2;
+        ALT_SIDE_CONFIGS[TYPE].slotGroups = new int[][] { {}, IntStream.range(SLOT_SWORD, SLOT_MORB_START + 9).toArray(), IntStream.range(SLOT_OUTPUT_START, SLOT_OUTPUT_START + 18).toArray(), { SLOT_SWORD }, IntStream.range(SLOT_MORB_START, SLOT_MORB_START + 9).toArray(), {}, IntStream.range(SLOT_SWORD, SLOT_OUTPUT_START + 18).toArray() };
+        ALT_SIDE_CONFIGS[TYPE].sideTypes = new int[] { NONE, OPEN };
+        ALT_SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 1, 1, 1, 1, 1, 1 };
 
         SLOT_CONFIGS[TYPE] = new SlotConfig();
         SLOT_CONFIGS[TYPE].allowInsertionSlot = new boolean[] { true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false };

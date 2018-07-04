@@ -27,6 +27,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.*;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -201,8 +202,11 @@ public class ItemAugment extends ItemMulti implements IInitializer, IAugmentItem
     }
 
     @Override
-    public boolean initialize()
+    public boolean preInit()
     {
+        ForgeRegistries.ITEMS.register(setRegistryName("augment"));
+        VirtualMachines.proxy.addIModelRegister(this);
+
         int metadata = 1024;
         machine_farm_soil = addAugmentItem(metadata++, VMConstants.MACHINE_FARM_SOIL, AugmentType.ADVANCED);
         machine_experience = addAugmentItem(metadata++, VMConstants.MACHINE_EXPERIENCE, AugmentType.MODE);
@@ -211,80 +215,117 @@ public class ItemAugment extends ItemMulti implements IInitializer, IAugmentItem
         machine_permamorb = addAugmentItem(metadata++, VMConstants.MACHINE_PERMAMORB, AugmentType.ADVANCED);
         machine_morb_capture = addAugmentItem(metadata++, VMConstants.MACHINE_MORB_CAPTURE, AugmentType.MODE);
 
-        VirtualMachines.proxy.addIModelRegister(this);
-
         return true;
     }
 
     @Override
-    public boolean register()
+    public boolean initialize()
     {
-        addShapedRecipe(machine_farm_soil,
-                " G ",
-                "PCP",
-                "DSE",
-                'G', "gearConstantan",
-                'P', "plateInvar",
-                'C', ItemMaterial.powerCoilElectrum,
-                'D', "dirt",
-                'S', "sand",
-                'E', Blocks.END_STONE
-        );
+        String category = "Item.Augment";
+        String comment;
 
-        addShapedRecipe(machine_experience,
-                " G ",
-                "PCP",
-                "SLS",
-                'G', "gearSignalum",
-                'P', "plateLumium",
-                'C', ItemMaterial.powerCoilElectrum,
-                'S', FluidUtil.getFilledBucket(new FluidStack(TFFluids.fluidExperience, Fluid.BUCKET_VOLUME)),
-                'L', ItemTomeExperience.tomeExperience
-        );
+        comment = "If TRUE, the recipe for the Virtual Farm's Soil Virtualization is enabled.";
+        boolean enableAugmentFarmSoil = VirtualMachines.CONFIG.getConfiguration().getBoolean("AugmentFarmSoil", category, true, comment);
 
-        addShapedRecipe(machine_nether,
-                " G ",
-                "PCP",
-                "NBN",
-                'G', "gearBronze",
-                'P', "plateSilver",
-                'C', ItemMaterial.powerCoilElectrum,
-                'N', "netherrack",
-                'B', Items.BLAZE_ROD
-        );
+        comment = "If TRUE, the recipe for the Experience Accumulator is enabled.";
+        boolean enableAugmentExp = VirtualMachines.CONFIG.getConfiguration().getBoolean("AugmentExpAccumulator", category, true, comment);
 
-        addShapedRecipe(machine_rancher,
-                " G ",
-                "PCP",
-                "BSB",
-                'G', "gearGold",
-                'P', "plateAluminum",
-                'C', ItemMaterial.powerCoilElectrum,
-                'B', Items.BUCKET,
-                'S', Items.SHEARS
-        );
+        comment = "If TRUE, the recipe for the Nether Simulator is enabled.";
+        boolean enableAugmentNether = VirtualMachines.CONFIG.getConfiguration().getBoolean("AugmentNether", category, true, comment);
 
-        addShapedRecipe(machine_permamorb,
-                " G ",
-                "PCP",
-                "SMS",
-                'G', "gearEnderium",
-                'P', "plateSteel",
-                'C', ItemMaterial.powerCoilElectrum,
-                'S', Items.NETHER_STAR,
-                'M', ItemMorb.morbReusable
-        );
+        comment = "If TRUE, the recipe for the Industrialized Rancher is enabled.";
+        boolean enableAugmentRancher = VirtualMachines.CONFIG.getConfiguration().getBoolean("AugmentRancher", category, true, comment);
 
-        addShapedRecipe(machine_morb_capture,
-                " G ",
-                "PCP",
-                "SMS",
-                'G', "gearLumium",
-                'P', "plateElectrum",
-                'C', ItemMaterial.powerCoilElectrum,
-                'S', "blockSlime",
-                'M', ItemMorb.morbReusable
-        );
+        comment = "If TRUE, the recipe for the Perma-Morb Inducer is enabled.";
+        boolean enableAugmentPermamorb = VirtualMachines.CONFIG.getConfiguration().getBoolean("AugmentPermamorb", category, true, comment);
+
+        comment = "If TRUE, the recipe for the Morb Capture is enabled.";
+        boolean enableAugmentMorbCapture = VirtualMachines.CONFIG.getConfiguration().getBoolean("AugmentMorbCapture", category, true, comment);
+
+        if (enableAugmentFarmSoil)
+        {
+            addShapedRecipe(machine_farm_soil,
+                    " G ",
+                    "PCP",
+                    "DSE",
+                    'G', "gearConstantan",
+                    'P', "plateInvar",
+                    'C', ItemMaterial.powerCoilElectrum,
+                    'D', "dirt",
+                    'S', "sand",
+                    'E', Blocks.END_STONE
+            );
+        }
+
+        if (enableAugmentExp)
+        {
+            addShapedRecipe(machine_experience,
+                    " G ",
+                    "PCP",
+                    "SLS",
+                    'G', "gearSignalum",
+                    'P', "plateLumium",
+                    'C', ItemMaterial.powerCoilElectrum,
+                    'S', FluidUtil.getFilledBucket(new FluidStack(TFFluids.fluidExperience, Fluid.BUCKET_VOLUME)),
+                    'L', ItemTomeExperience.tomeExperience
+            );
+        }
+
+        if (enableAugmentNether)
+        {
+            addShapedRecipe(machine_nether,
+                    " G ",
+                    "PCP",
+                    "NBN",
+                    'G', "gearBronze",
+                    'P', "plateSilver",
+                    'C', ItemMaterial.powerCoilElectrum,
+                    'N', "netherrack",
+                    'B', Items.BLAZE_ROD
+            );
+        }
+
+        if (enableAugmentRancher)
+        {
+            addShapedRecipe(machine_rancher,
+                    " G ",
+                    "PCP",
+                    "BSB",
+                    'G', "gearGold",
+                    'P', "plateAluminum",
+                    'C', ItemMaterial.powerCoilElectrum,
+                    'B', Items.BUCKET,
+                    'S', Items.SHEARS
+            );
+        }
+
+        if (enableAugmentPermamorb)
+        {
+            addShapedRecipe(machine_permamorb,
+                    " G ",
+                    "PCP",
+                    "SMS",
+                    'G', "gearEnderium",
+                    'P', "plateSteel",
+                    'C', ItemMaterial.powerCoilElectrum,
+                    'S', Items.NETHER_STAR,
+                    'M', ItemMorb.morbReusable
+            );
+        }
+
+        if (enableAugmentMorbCapture)
+        {
+            addShapedRecipe(machine_morb_capture,
+                    " G ",
+                    "PCP",
+                    "SMS",
+                    'G', "gearLumium",
+                    'P', "plateElectrum",
+                    'C', ItemMaterial.powerCoilElectrum,
+                    'S', "blockSlime",
+                    'M', ItemMorb.morbReusable
+            );
+        }
 
         return true;
     }
