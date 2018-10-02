@@ -138,12 +138,13 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
     }
 
     @Override
-    public TileEntity createNewTileEntity(World world, int metadata)
+    public TileEntity createTileEntity(World world, IBlockState state)
     {
-        if (metadata >= Type.values().length)
+        int meta = state.getBlock().getMetaFromState(state);
+        if (meta >= Type.values().length) 
             return null;
 
-        switch (Type.byMetadata(metadata))
+        switch (Type.values()[meta])
         {
             case FARM:
                 return new TileFarm();
