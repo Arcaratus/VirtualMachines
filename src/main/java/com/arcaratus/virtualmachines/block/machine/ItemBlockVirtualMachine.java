@@ -7,6 +7,7 @@ import cofh.thermalexpansion.init.TEProps;
 import com.arcaratus.virtualmachines.block.BlockVirtualMachine;
 import com.arcaratus.virtualmachines.block.BlockVirtualMachine.Type;
 import net.minecraft.block.Block;
+import cofh.core.block.BlockCore;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class ItemBlockVirtualMachine extends ItemBlockTEBase
 {
-    public ItemBlockVirtualMachine(Block block)
+    public ItemBlockVirtualMachine(BlockCore block)
     {
         super(block);
     }
