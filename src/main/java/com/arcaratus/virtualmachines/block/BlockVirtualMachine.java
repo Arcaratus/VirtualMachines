@@ -95,7 +95,7 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
     @Override
     public void getSubBlocks(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        for (int i = 0; i < Type.METADATA_LOOKUP.length; i++)
+        for (int i = 0; i < Type.values().length; i++)
         {
             if (enable[i])
             {
@@ -120,9 +120,15 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
     }
 
     @Override
+    public String getUnlocalizedName(ItemStack stack)
+    {
+        return "tile.virtualmachines." + Type.values()[ItemHelper.getItemDamage(stack)].getName() + ".name";
+    }
+
+    @Override
     public IBlockState getStateFromMeta(int meta)
     {
-        return getDefaultState().withProperty(VARIANT, Type.byMetadata(meta));
+        return getDefaultState().withProperty(VARIANT, Type.values()[meta]);
     }
 
     @Override
@@ -138,12 +144,13 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
     }
 
     @Override
-    public TileEntity createNewTileEntity(World world, int metadata)
+    public TileEntity createTileEntity(World world, IBlockState state)
     {
-        if (metadata >= Type.values().length)
+        int meta = state.getBlock().getMetaFromState(state);
+        if (meta >= Type.values().length)
             return null;
 
-        switch (Type.byMetadata(metadata))
+        switch (Type.values()[meta])
         {
             case FARM:
                 return new TileFarm();
@@ -469,7 +476,7 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         if (!BlockMachine.enableUpgradeKitCrafting)
             return;
 
-        for (int i = 0; i < Type.METADATA_LOOKUP.length; i++)
+        for (int i = 0; i < Type.values().length; i++)
         {
             if (enable[i])
             {
@@ -493,7 +500,7 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         if (!BlockMachine.enableClassicRecipes)
             return;
 
-        for (int i = 0; i < Type.METADATA_LOOKUP.length; i++)
+        for (int i = 0; i < Type.values().length; i++)
         {
             if (enable[i])
             {
@@ -542,7 +549,6 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         MOB_FARM(5, "mob_farm"),
         ;
 
-        private static final Type[] METADATA_LOOKUP = new Type[values().length];
         private final int metadata;
         private final String name;
 
@@ -561,24 +567,6 @@ public class BlockVirtualMachine extends BlockTEBase implements IModelRegister, 
         public String getName()
         {
             return this.name;
-        }
-
-        public static Type byMetadata(int metadata)
-        {
-            if (metadata < 0 || metadata >= METADATA_LOOKUP.length)
-            {
-                metadata = 0;
-            }
-
-            return METADATA_LOOKUP[metadata];
-        }
-
-        static
-        {
-            for (Type type : values())
-            {
-                METADATA_LOOKUP[type.getMetadata()] = type;
-            }
         }
     }
 }

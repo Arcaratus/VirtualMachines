@@ -225,7 +225,7 @@ public abstract class TileVirtualMachine extends TilePowered implements IAcceler
     @Override
     public String getTileName()
     {
-        return "tile.virtualmachines." + Type.byMetadata(getType()).getName() + ".name";
+        return "tile.virtualmachines." + Type.values()[getType()].getName() + ".name";
     }
 
     @Override

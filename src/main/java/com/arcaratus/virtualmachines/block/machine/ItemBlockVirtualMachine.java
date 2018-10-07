@@ -1,12 +1,11 @@
 package com.arcaratus.virtualmachines.block.machine;
 
 import cofh.api.tileentity.IRedstoneControl;
+import cofh.core.block.BlockCore;
 import cofh.core.util.helpers.*;
 import cofh.thermalexpansion.block.ItemBlockTEBase;
 import cofh.thermalexpansion.init.TEProps;
 import com.arcaratus.virtualmachines.block.BlockVirtualMachine;
-import com.arcaratus.virtualmachines.block.BlockVirtualMachine.Type;
-import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -16,7 +15,7 @@ import java.util.List;
 
 public class ItemBlockVirtualMachine extends ItemBlockTEBase
 {
-    public ItemBlockVirtualMachine(Block block)
+    public ItemBlockVirtualMachine(BlockCore block)
     {
         super(block);
     }
@@ -34,12 +33,6 @@ public class ItemBlockVirtualMachine extends ItemBlockTEBase
     }
 
     @Override
-    public String getUnlocalizedName(ItemStack stack)
-    {
-        return "tile.virtualmachines." + Type.byMetadata(ItemHelper.getItemDamage(stack)).getName() + ".name";
-    }
-
-    @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn)
     {
         SecurityHelper.addOwnerInformation(stack, tooltip);
@@ -52,7 +45,7 @@ public class ItemBlockVirtualMachine extends ItemBlockTEBase
 
         SecurityHelper.addAccessInformation(stack, tooltip);
 
-        String name = BlockVirtualMachine.Type.byMetadata(ItemHelper.getItemDamage(stack)).getName();
+        String name = BlockVirtualMachine.Type.values()[ItemHelper.getItemDamage(stack)].getName();
         tooltip.add(StringHelper.getInfoText("info.virtualmachines." + name));
 
         if (getLevel(stack) >= TEProps.levelRedstoneControl)
