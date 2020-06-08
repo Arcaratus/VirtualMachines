@@ -39,6 +39,7 @@ import static cofh.core.util.core.SideConfig.*;
 public class TileMobFarm extends TileVirtualMachine
 {
     private static final int TYPE = Type.MOB_FARM.getMetadata();
+    private static final int SLOT_COUNT = 29; // 1 + 9 + 18 + 1 = 29
     public static int basePower = 200;
 
     public static int SLOT_SWORD = 0;
@@ -65,8 +66,8 @@ public class TileMobFarm extends TileVirtualMachine
         ALT_SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 1, 1, 1, 1, 1, 1 };
 
         SLOT_CONFIGS[TYPE] = new SlotConfig();
-        SLOT_CONFIGS[TYPE].allowInsertionSlot = new boolean[] { true, true, true, true, true, true, true, true, true, true, false, false, false, false, false, false, false, false, false };
-        SLOT_CONFIGS[TYPE].allowExtractionSlot = new boolean[] { false, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true };
+        SLOT_CONFIGS[TYPE].allowInsertionSlot = Utils.buildFilterArray(SLOT_COUNT, 0, 10); // sword, morbs
+        SLOT_CONFIGS[TYPE].allowExtractionSlot = Utils.buildFilterArray(SLOT_COUNT, 1, 28); // morbs, outputs
 
         VALID_AUGMENTS[TYPE] = new HashSet<>();
         VALID_AUGMENTS[TYPE].add(VMConstants.MACHINE_EXPERIENCE);
@@ -108,7 +109,7 @@ public class TileMobFarm extends TileVirtualMachine
     {
         super();
 
-        inventory = new ItemStack[29]; // 1 + 9 + 18 + 1 = 29
+        inventory = new ItemStack[SLOT_COUNT];
         Arrays.fill(inventory, ItemStack.EMPTY);
         createAllSlots(inventory.length);
         tank.setLock(TFFluids.fluidExperience);

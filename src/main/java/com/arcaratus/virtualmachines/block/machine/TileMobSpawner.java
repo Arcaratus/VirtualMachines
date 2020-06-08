@@ -41,6 +41,7 @@ import static cofh.core.util.core.SideConfig.*;
 public class TileMobSpawner extends TileVirtualMachine
 {
     private static final int TYPE = Type.MOB_SPAWNER.getMetadata();
+    private static final int SLOT_COUNT = 12; // 9 + 1 + 1 + 1 = 12
     public static int basePower = 80;
 
     public static int SLOT_SWORD = 0;
@@ -68,8 +69,8 @@ public class TileMobSpawner extends TileVirtualMachine
         ALT_SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 1, 1, 1, 1, 1, 1 };
 
         SLOT_CONFIGS[TYPE] = new SlotConfig();
-        SLOT_CONFIGS[TYPE].allowInsertionSlot = new boolean[] { true, true, false, false, false, false, false, false, false, false, false };
-        SLOT_CONFIGS[TYPE].allowExtractionSlot = new boolean[] { false, true, true, true, true, true, true, true, true, true, true };
+        SLOT_CONFIGS[TYPE].allowInsertionSlot = Utils.buildFilterArray(SLOT_COUNT, 0, 2); // sword, morb
+        SLOT_CONFIGS[TYPE].allowExtractionSlot = Utils.buildFilterArray(SLOT_COUNT, 1, 11); // morb, outputs
 
         VALID_AUGMENTS[TYPE] = new HashSet<>();
         VALID_AUGMENTS[TYPE].add(VMConstants.MACHINE_EXPERIENCE);
@@ -113,7 +114,7 @@ public class TileMobSpawner extends TileVirtualMachine
     {
         super();
 
-        inventory = new ItemStack[12]; // 9 + 1 + 1 + 1 = 12
+        inventory = new ItemStack[SLOT_COUNT];
         Arrays.fill(inventory, ItemStack.EMPTY);
         createAllSlots(inventory.length);
         tank.setLock(TFFluids.fluidExperience);
