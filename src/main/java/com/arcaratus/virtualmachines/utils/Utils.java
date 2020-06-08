@@ -197,4 +197,17 @@ public class Utils
 
         return result;
     }
+
+    public static boolean[] buildFilterArray(int size, int... ranges)
+    {
+        if (ranges.length % 2 == 1)
+            throw new IllegalArgumentException("Unclosed range!");
+
+        boolean[] filterArray = new boolean[size];
+
+        for (int i = 0; i < ranges.length; i += 2)
+            Arrays.fill(filterArray, ranges[i], ranges[i + 1], true);
+
+        return filterArray;
+    }
 }

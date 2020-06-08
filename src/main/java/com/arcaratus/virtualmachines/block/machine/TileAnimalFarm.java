@@ -43,6 +43,7 @@ import static cofh.core.util.core.SideConfig.*;
 public class TileAnimalFarm extends TileVirtualMachine
 {
     private static final int TYPE = Type.ANIMAL_FARM.getMetadata();
+    private static final int SLOT_COUNT = 15; // 4 + 9 + 1 + 1
     public static int basePower = 80;
 
     public static int SLOT_TOOLS_START = 0;
@@ -70,8 +71,8 @@ public class TileAnimalFarm extends TileVirtualMachine
         ALT_SIDE_CONFIGS[TYPE].defaultSides = new byte[] { 1, 1, 1, 1, 1, 1 };
 
         SLOT_CONFIGS[TYPE] = new SlotConfig();
-        SLOT_CONFIGS[TYPE].allowInsertionSlot = new boolean[] { true, true, true, true, true, false, false, false, false, false, false, false, false, false };
-        SLOT_CONFIGS[TYPE].allowExtractionSlot = new boolean[] { false, false, false, false, false, true, true, true, true, true, true, true, true, true };
+        SLOT_CONFIGS[TYPE].allowInsertionSlot = Utils.buildFilterArray(SLOT_COUNT, 0, 5); // tools, morb
+        SLOT_CONFIGS[TYPE].allowExtractionSlot = Utils.buildFilterArray(SLOT_COUNT, 5, 14); // outputs
 
         VALID_AUGMENTS[TYPE] = new HashSet<>();
         VALID_AUGMENTS[TYPE].add(VMConstants.MACHINE_EXPERIENCE);
@@ -119,7 +120,7 @@ public class TileAnimalFarm extends TileVirtualMachine
     {
         super();
 
-        inventory = new ItemStack[15]; // 4 + 9 + 1 + 1
+        inventory = new ItemStack[SLOT_COUNT];
         Arrays.fill(inventory, ItemStack.EMPTY);
         createAllSlots(inventory.length);
         tank.setLock(TFFluids.fluidExperience);
