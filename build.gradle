@@ -40,7 +40,7 @@ repositories {
 
 dependencies {
     deobfCompile "mezz.jei:jei_${mc_version}:${jei_version}"
-    deobfCompile "mcp.mobius.waila:Hwyla:${waila_version}_1.12"
+    deobfCompile "mcp.mobius.waila:Hwyla:${waila_version}_1.12.2"
 	deobfCompile "cofh:RedstoneFlux:1.12-2.+:deobf"
 	deobfCompile "cofh:CoFHCore:${mc_version}-+:deobf"
     deobfCompile "cofh:CoFHWorld:${mc_version}-${cofh_world_version}:deobf"
